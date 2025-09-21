@@ -9,6 +9,17 @@ import {
 import Sidebar from "./components/Sidebar";
 import MovieCard from "./components/MovieCard";
 
+import { useAuth } from "@clerk/clerk-react";
+
+function GetToken() {
+  const { getToken } = useAuth();
+  const handleClick = async () => {
+    const token = await getToken();
+    console.log("Token:", token);
+  };
+  return <button onClick={handleClick}>Log Token</button>;
+}
+
 // fetchMovies simulates a backend call to /src/data.json
 function fetchMovies() {
   return new Promise((resolve, reject) => {
@@ -114,6 +125,8 @@ function App() {
             </SignedIn>
           </div>
         </header>
+
+        <GetToken />
         <section className="px-8 py-6">
           <div className="rounded-2xl overflow-hidden shadow-2xl border-2 border-[#f5c518] relative h-56 bg-gradient-to-r from-[#232323] to-[#141414] flex items-center justify-center mb-8">
             <img
