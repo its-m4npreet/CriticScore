@@ -12,6 +12,7 @@ import userRoutes from "./routes/userRoutes.js";
 import movieRoutes from "./routes/movieRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import devRoutes from "./routes/devRoutes.js";
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ const PORT = process.env.PORT || 3000;
 connectDB();
 checkSuperAdmin();
 
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(clerkMiddleware());
 app.use(express.json());
 
