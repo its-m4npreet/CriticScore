@@ -1,13 +1,19 @@
 import StarRating from "./StarRating";
+import { Link } from "react-router-dom";
 
-export default function MovieCard({ movie }) {
+ function MovieCard({ movie }) {
+  console.log(movie);
   return (
     <div className="bg-[#232323] rounded-xl shadow-2xl overflow-hidden hover:border-[#f5c518] border-2 border-transparent transition-all duration-200">
+    
+      <Link to={`/movie/${movie.movieId}`}>
       <img
         src={movie.image}
         alt={movie.name}
         className="w-full h-48 object-cover"
       />
+        </Link>
+
       <div className="p-4">
         <h4 className="text-lg font-extrabold mb-1 text-[#f5c518] drop-shadow">
           {movie.name}
@@ -23,3 +29,4 @@ export default function MovieCard({ movie }) {
     </div>
   );
 }
+export default MovieCard;
