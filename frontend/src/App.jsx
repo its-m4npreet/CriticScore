@@ -8,13 +8,18 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 import { useAuth } from "@clerk/clerk-react";
+import MovieDetailPage from "./pages/movieDetails";
+import TestPage from "./pages/TestPage";
+import apiService from "./services/api";
 
 import Sidebar from "./components/Sidebar";
 import HomePage from "./pages/HomePage";
 import TrendingPage from "./pages/TrendingPage";
+import TopRatedPage from "./pages/TopRatedPage";
+import CategoriesPage from "./pages/CategoriesPage";
+import WatchlistPage from "./pages/WatchlistPage";
+import UpcomingPage from "./pages/UpcomingPage";
 import SettingsPage from "./pages/SettingsPage";
-// import MovieDetailPage from "./pages/MovieDetailPage";
-import MovieDetailPage  from "./pages/movieDetails";
 
 function GetToken() {
   const { getToken } = useAuth();
@@ -25,17 +30,53 @@ function GetToken() {
   return <button onClick={handleClick}>Log Token</button>;
 }
 
-// fetchMovies simulates a backend call to /src/data.json
-function fetchMovies() {
-  return new Promise((resolve, reject) => {
-    fetch("/src/data.json")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch movies");
-        return res.json();
-      })
-      .then(resolve)
-      .catch(reject);
-  });
+// fetchMovies tries backend first, falls back to local data
+async function fetchMovies() {
+  try {
+    // Try to fetch from backend first
+    const backendData = await apiService.getMovies();
+    if (backendData && backendData.movies) {
+      // Keep backend data structure and add frontend-compatible fields
+      const convertedMovies = backendData.movies.map((movie) => ({
+        // Backend fields
+        _id: movie._id,
+        title: movie.title,
+        description: movie.description,
+        poster: movie.poster,
+        releaseDate: movie.releaseDate,
+        averageRating: movie.averageRating,
+        genre: movie.genre,
+        director: movie.director,
+        cast: movie.cast,
+        duration: movie.duration,
+        language: movie.language,
+        country: movie.country,
+        featured: movie.featured,
+        isActive: movie.isActive,
+        // Frontend-compatible fields
+        name: movie.title,
+        image: movie.poster || "https://via.placeholder.com/300x400",
+        desc: movie.description,
+        year: new Date(movie.releaseDate).getFullYear(),
+        rating: movie.averageRating || 0,
+        trending: movie.featured || false,
+        top: (movie.averageRating || 0) > 8,
+        category: movie.genre?.[0] || "Drama",
+        upcoming: false,
+        watchlist: false,
+        movieId: movie._id,
+      }));
+      return convertedMovies;
+    }
+  } catch (backendError) {
+    console.warn("Backend fetch failed, trying local data:", backendError);
+  }
+
+  // Fallback to local data
+  const res = await fetch("/src/data.json");
+  if (!res.ok) throw new Error("Failed to fetch local movies");
+  const localData = await res.json();
+  return localData;
 }
 
 function App() {
@@ -44,18 +85,29 @@ function App() {
   const [error, setError] = useState(null);
   const location = useLocation();
   const currentPath = location.pathname;
+  const { getToken } = useAuth();
+
+  // Set up auth token for API service
+  React.useEffect(() => {
+    if (getToken) {
+      window.__clerk_token_getter = getToken;
+    }
+  }, [getToken]);
 
   React.useEffect(() => {
-    setLoading(true);
-    fetchMovies()
-      .then((data) => {
+    const loadMovies = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchMovies();
         setAllMovies(data);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    loadMovies();
   }, []);
 
   return (
@@ -85,40 +137,24 @@ function App() {
         </header>
 
         <GetToken />
-        
+
         <Routes>
-          <Route 
-            path="/" 
-            element={<HomePage allMovies={allMovies} loading={loading} error={error} />} 
+          <Route
+            path="/"
+            element={
+              <HomePage allMovies={allMovies} loading={loading} error={error} />
+            }
           />
-          <Route 
-            path="/trending" 
-            element={<TrendingPage allMovies={allMovies} loading={loading} error={error} />} 
-          />
-          <Route 
-            path="/top" 
-            element={<HomePage allMovies={allMovies.filter(m => m.top)} loading={loading} error={error} />} 
-          />
-          <Route 
-            path="/categories" 
-            element={<HomePage allMovies={allMovies} loading={loading} error={error} />} 
-          />
-          <Route 
-            path="/watchlist" 
-            element={<HomePage allMovies={allMovies.filter(m => m.watchlist)} loading={loading} error={error} />} 
-          />
-          <Route 
-            path="/upcoming" 
-            element={<HomePage allMovies={allMovies.filter(m => m.upcoming)} loading={loading} error={error} />} 
-          />
-          <Route 
-            path="/settings" 
-            element={<SettingsPage />} 
-          />
-          <Route 
-            path="/movie/:id" 
-            // element={<MovieDetailPage allMovies={allMovies} />} 
-             element={<MovieDetailPage allMovies={allMovies} />} 
+          <Route path="/trending" element={<TrendingPage />} />
+          <Route path="/top" element={<TopRatedPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/watchlist" element={<WatchlistPage />} />
+          <Route path="/upcoming" element={<UpcomingPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/test" element={<TestPage />} />
+          <Route
+            path="/movie/:id"
+            element={<MovieDetailPage allMovies={allMovies} />}
           />
         </Routes>
       </main>

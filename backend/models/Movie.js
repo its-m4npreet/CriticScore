@@ -123,7 +123,10 @@ const movieSchema = new mongoose.Schema(
   }
 );
 
-movieSchema.index({ title: "text", description: "text", director: "text" });
+movieSchema.index(
+  { title: "text", description: "text", director: "text" },
+  { default_language: "none" }
+);
 movieSchema.index({ genre: 1 });
 movieSchema.index({ releaseDate: -1 });
 movieSchema.index({ averageRating: -1 });

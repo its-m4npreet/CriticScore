@@ -1,10 +1,12 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "seed": "node scripts/seedMovies.js"
   },
   "keywords": [],
   "author": "",

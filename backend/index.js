@@ -12,6 +12,7 @@ import userRoutes from "./routes/userRoutes.js";
 import movieRoutes from "./routes/movieRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import devRoutes from "./routes/devRoutes.js";
+import watchlistRoutes from "./routes/watchlistRoutes.js";
 import cors from "cors";
 
 const app = express();
@@ -32,6 +33,7 @@ app.get("/", (req, res) => {
       health: "/health",
       users: "/api/users",
       movies: "/api/movies",
+      watchlist: "/api/watchlist",
       admin: "/api/admin",
     },
   });
@@ -48,6 +50,7 @@ app.get("/health", (req, res) => {
 app.use("/api/users", userRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/watchlist", watchlistRoutes);
 
 if (process.env.NODE_ENV === "development") {
   app.use("/dev", devRoutes);
