@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import React, { useEffect, useState } from "react";
 import {
   FaArrowLeft,
@@ -14,6 +14,7 @@ import apiService from "../services/api";
 export default function MovieDetailPage({ allMovies }) {
   const { id } = useParams();
   const { getToken } = useAuth();
+  const {  isSignedIn } = useUser();
 
   // Use backend data if available, fallback to prop data
   const [movie, setMovie] = useState(null);
@@ -96,6 +97,34 @@ export default function MovieDetailPage({ allMovies }) {
     loadMovieData();
   }, [loadMovieData]);
 
+  // Check watchlist status when user signs in
+  useEffect(() => {
+    const checkWatchlistStatus = async () => {
+      if (isSignedIn && movie) {
+        const movieId = movie?._id || movie?.id || movie?.movieId || id;
+        
+        if (!movieId) {
+          console.error('No valid movie ID found for watchlist check');
+          return;
+        }
+        
+        try {
+          const watchlistStatus = await apiService.checkWatchlistStatus(movieId);
+          console.log('Watchlist status response:', watchlistStatus);
+          setIsWatchlisted(watchlistStatus.isInWatchlist);
+          console.log('Watchlist status checked:', watchlistStatus.isInWatchlist);
+        } catch (error) {
+          console.error('Error checking watchlist status:', error);
+          // Fallback to localStorage
+          const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+          setIsWatchlisted(watchlist.includes(movieId));
+        }
+      }
+    };
+
+    checkWatchlistStatus();
+  }, [isSignedIn, movie, id]);
+
   // Show notification helper
   const showNotification = (message) => {
     setNotification(message);
@@ -103,21 +132,65 @@ export default function MovieDetailPage({ allMovies }) {
   };
 
   // Handle watchlist toggle
-  const handleWatchlistToggle = () => {
-    const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
-    let updatedWatchlist;
-
-    if (isWatchlisted) {
-      updatedWatchlist = watchlist.filter((movieId) => movieId !== id);
-      setIsWatchlisted(false);
-      showNotification("Removed from watchlist");
-    } else {
-      updatedWatchlist = [...watchlist, id];
-      setIsWatchlisted(true);
-      showNotification("Added to watchlist");
+  const handleWatchlistToggle = async () => {
+    if (!isSignedIn) {
+      showNotification("Please sign in to add to watchlist");
+      return;
     }
 
-    localStorage.setItem("watchlist", JSON.stringify(updatedWatchlist));
+    // Get the correct movie ID - try different possible properties
+    const movieId = movie?._id || movie?.id || movie?.movieId || id;
+    
+    console.log('Debug - Movie object:', movie);
+    console.log('Debug - Movie ID used:', movieId);
+    console.log('Debug - URL ID:', id);
+    
+    if (!movieId) {
+      console.error('No valid movie ID found');
+      showNotification("Error: Movie ID not found");
+      return;
+    }
+
+    try {
+      if (isWatchlisted) {
+        // Remove from watchlist
+        await apiService.removeFromWatchlist(movieId);
+        setIsWatchlisted(false);
+        showNotification("Removed from watchlist");
+        console.log('Movie removed from watchlist:', movieId);
+      } else {
+        // Add to watchlist
+        await apiService.addToWatchlist(movieId);
+        setIsWatchlisted(true);
+        showNotification("Added to watchlist");
+        console.log('Movie added to watchlist:', movieId);
+      }
+    } catch (error) {
+      console.error('Error toggling watchlist:', error);
+      
+      // Handle 409 conflict (movie already in watchlist)
+      if (error.message.includes('already in watchlist')) {
+        setIsWatchlisted(true);
+        showNotification("Movie is already in watchlist");
+        return;
+      }
+      
+      // Fallback to localStorage for offline functionality
+      const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
+      let updatedWatchlist;
+
+      if (isWatchlisted) {
+        updatedWatchlist = watchlist.filter((movieId) => movieId !== movie.movieId);
+        setIsWatchlisted(false);
+        showNotification("Removed from watchlist (offline)");
+      } else {
+        updatedWatchlist = [...watchlist, movie.movieId];
+        setIsWatchlisted(true);
+        showNotification("Added to watchlist (offline)");
+      }
+
+      localStorage.setItem("watchlist", JSON.stringify(updatedWatchlist));
+    }
   };
 
   // Handle like toggle

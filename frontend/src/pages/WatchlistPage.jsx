@@ -22,10 +22,45 @@ export default function WatchlistPage() {
         console.log("Fetching watchlist from backend...");
         const watchlistItems = await ApiService.getWatchlist();
         console.log("Watchlist items received:", watchlistItems);
+        console.log("Watchlist items type:", typeof watchlistItems, "Array?", Array.isArray(watchlistItems));
 
         if (Array.isArray(watchlistItems)) {
-          const watchlistMovies = watchlistItems.map((item) => item.movieId);
-          console.log("Processed watchlist movies:", watchlistMovies);
+          // Extract movie IDs from watchlist items and ensure they're strings
+          const movieIds = watchlistItems.map((item) => String(item.movieId));
+          console.log("Movie IDs from watchlist:", movieIds);
+          console.log("MovieIds after string conversion:", movieIds.map(id => `'${id}' (${typeof id})`));
+          
+          // Fetch full movie details for each movie ID
+          const allMoviesResponse = await ApiService.getMovies();
+          console.log("🌐 Full API Response:", allMoviesResponse);
+          
+          // Handle new API response structure with pagination
+          const movies = Array.isArray(allMoviesResponse) 
+            ? allMoviesResponse 
+            : (allMoviesResponse?.movies || []);
+          
+          console.log("📽️ Extracted movies array:", movies);
+          console.log("All movies structure (first movie):", movies[0]);
+          console.log("Movie _id type:", typeof movies[0]?._id, "Value:", movies[0]?._id);
+          console.log("Looking for movie IDs:", movieIds);
+          console.log("MovieIds types:", movieIds.map(id => typeof id));
+          
+          const watchlistMovies = movies.filter((movie) => {
+            const movieId = movie._id || movie.movieId || movie.id;
+            console.log("Comparing movieId:", movieId, "(type:", typeof movieId, ") with watchlist IDs:", movieIds);
+            
+            // Convert both to strings for comparison (handles ObjectId vs String)
+            const movieIdStr = String(movieId);
+            const isMatch = movieIds.includes(movieIdStr);
+            
+            if (isMatch) {
+              console.log("✅ Found matching movie:", movie.title, "with ID:", movieId);
+            } else {
+              console.log("❌ No match for movie:", movie.title, "ID:", movieId);
+            }
+            return isMatch;
+          });
+          console.log("Full watchlist movies:", watchlistMovies);
           setWatchlist(watchlistMovies);
         } else {
           console.error("Unexpected watchlist format:", watchlistItems);
@@ -42,8 +77,10 @@ export default function WatchlistPage() {
           console.log("Local watchlist:", localWatchlist);
 
           if (localWatchlist.length > 0) {
-            const allMovies = await ApiService.getMovies();
-            const movies = Array.isArray(allMovies) ? allMovies : [];
+            const allMoviesResponse = await ApiService.getMovies();
+            const movies = Array.isArray(allMoviesResponse) 
+              ? allMoviesResponse 
+              : (allMoviesResponse?.movies || []);
             const watchlistMovies = movies.filter((movie) =>
               localWatchlist.includes(movie._id || movie.movieId)
             );
@@ -67,12 +104,20 @@ export default function WatchlistPage() {
 
     try {
       await ApiService.removeFromWatchlist(movieId);
-      setWatchlist((prev) => prev.filter((movie) => movie._id !== movieId));
+      // Remove from local state using flexible ID matching
+      setWatchlist((prev) => prev.filter((movie) => {
+        const id = movie._id || movie.movieId || movie.id;
+        return id !== movieId;
+      }));
     } catch (error) {
       console.error("Failed to remove from watchlist:", error);
       // Fallback to localStorage
       ApiService.removeFromWatchlistLocal(user.id, movieId);
-      setWatchlist((prev) => prev.filter((movie) => movie._id !== movieId));
+      // Remove from local state using flexible ID matching
+      setWatchlist((prev) => prev.filter((movie) => {
+        const id = movie._id || movie.movieId || movie.id;
+        return id !== movieId;
+      }));
     }
   };
 
@@ -163,12 +208,12 @@ export default function WatchlistPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {watchlist.map((movie) => (
-            <div key={movie._id} className="relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-6">
+          {watchlist.map((movie, index) => (
+            <div key={movie._id || movie.movieId || movie.id || `movie-${index}`} className="relative">
               <MovieCard movie={movie} />
               <button
-                onClick={() => removeFromWatchlist(movie._id)}
+                onClick={() => removeFromWatchlist(movie._id || movie.movieId || movie.id)}
                 className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-colors z-10"
                 title="Remove from watchlist"
               >
