@@ -18,7 +18,6 @@ import TrendingPage from "./pages/TrendingPage";
 import TopRatedPage from "./pages/TopRatedPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import WatchlistPage from "./pages/WatchlistPage";
-import UpcomingPage from "./pages/UpcomingPage";
 import SettingsPage from "./pages/SettingsPage";
 
 function GetToken() {
@@ -111,27 +110,27 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#141414] flex text-white font-sans">
+    <div className="min-h-screen theme-bg-primary flex theme-text-primary font-sans theme-transition">
       <Sidebar />
-      <main className="flex-1 flex flex-col bg-[#141414] ml-60">
-        <header className="flex items-center justify-between px-8 py-4 bg-[#141414] border-b border-[#222]">
+            <main className="flex-1 flex flex-col theme-bg-primary ml-60">
+                <header className="flex items-center justify-between px-8 py-4 theme-bg-primary border-b theme-border">
           <div className="flex items-center gap-4 justify-between w-full">
             <input
               type="search"
               placeholder="Search movies, shows, people..."
-              className="bg-[#232323] text-white px-4 py-2 rounded-lg w-[30rem] focus:outline-none focus:ring-2 focus:ring-[#f5c518] placeholder-gray-400"
+              className="settings-input px-4 py-2 rounded-lg w-[30rem] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] placeholder-[var(--text-secondary)]"
               disabled={currentPath === "/settings"}
             />
             <div className="flex items-center gap-8">
               <SignedOut>
-                <SignInButton className="bg-[#f5c518] text-black px-4 py-2 rounded-lg cursor-pointer hover:bg-[#e5b91f]" />
-                <SignUpButton className="border-1 border-[#f5c518] text-[#f5c518] px-4 py-2 rounded-lg cursor-pointer hover:bg-[#f5c518] hover:text-black transition-colors" />
+                <SignInButton className="bg-[var(--accent-color)] text-[var(--bg-primary)] px-4 py-2 rounded-lg cursor-pointer hover:opacity-90 transition-all" />
+                <SignUpButton className="border-2 border-[var(--accent-color)] text-[var(--accent-color)] px-4 py-2 rounded-lg cursor-pointer hover:bg-[var(--accent-color)] hover:text-[var(--bg-primary)] transition-colors" />
               </SignedOut>
             </div>
           </div>
           <div>
             <SignedIn>
-              <UserButton />
+              <UserButton  />
             </SignedIn>
           </div>
         </header>
@@ -149,7 +148,6 @@ function App() {
           <Route path="/top" element={<TopRatedPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
-          <Route path="/upcoming" element={<UpcomingPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/test" element={<TestPage />} />
           <Route

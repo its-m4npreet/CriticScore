@@ -193,7 +193,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f5c518]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 theme-border-accent"></div>
       </div>
     );
   }
@@ -201,14 +201,14 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg">
+        <div className="theme-error-bg border theme-error-border theme-error-text px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
       {/* User Rating Section */}
-      <div className="bg-[#232323] rounded-xl p-6">
-        <h3 className="text-xl font-bold text-[#f5c518] mb-4">Your Review</h3>
+      <div className="theme-bg-secondary rounded-xl p-6">
+        <h3 className="text-xl font-bold theme-accent mb-4">Your Review</h3>
 
         {isSignedIn ? (
           <div>
@@ -217,7 +217,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <StarRating rating={userRating.rating} size="large" />
-                    <span className="text-2xl font-bold text-[#f5c518]">
+                    <span className="text-2xl font-bold theme-accent">
                       {userRating.rating}/10
                     </span>
                   </div>
@@ -241,14 +241,14 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
                 </div>
 
                 {userRating.review && (
-                  <div className="bg-[#1a1a1a] rounded-lg p-4">
-                    <p className="text-gray-300 leading-relaxed">
+                  <div className="theme-bg-tertiary rounded-lg p-4">
+                    <p className="theme-text-primary leading-relaxed">
                       {userRating.review}
                     </p>
                   </div>
                 )}
 
-                <div className="text-sm text-gray-400">
+                <div className="text-sm theme-text-secondary">
                   {userRating.isPublic
                     ? "🌐 Public review"
                     : "🔒 Private review"}
@@ -259,7 +259,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
                 {!showReviewForm && (
                   <button
                     onClick={() => setShowReviewForm(true)}
-                    className="bg-[#f5c518] text-black px-6 py-3 rounded-lg font-semibold hover:bg-[#e5b91f] transition-colors"
+                    className="theme-button-primary px-6 py-3 rounded-lg font-semibold hover:theme-button-primary-hover transition-colors"
                   >
                     {userRating ? "Edit Your Review" : "Write a Review"}
                   </button>
@@ -277,7 +277,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium theme-text-primary mb-2">
                         Review (Optional)
                       </label>
                       <textarea
@@ -291,9 +291,9 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
                         placeholder="Share your thoughts about this movie..."
                         rows={4}
                         maxLength={1000}
-                        className="w-full bg-[#1a1a1a] text-white rounded-lg px-4 py-3 border border-gray-600 focus:border-[#f5c518] focus:outline-none resize-vertical"
+                        className="w-full theme-input rounded-lg px-4 py-3 border theme-border focus:theme-border-accent focus:outline-none resize-vertical"
                       />
-                      <div className="text-right text-sm text-gray-400 mt-1">
+                      <div className="text-right text-sm theme-text-secondary mt-1">
                         {reviewForm.review.length}/1000 characters
                       </div>
                     </div>
@@ -313,7 +313,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
                       />
                       <label
                         htmlFor="isPublic"
-                        className="text-sm text-gray-300"
+                        className="text-sm theme-text-primary"
                       >
                         Make this review public
                       </label>
@@ -323,7 +323,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
                       <button
                         type="submit"
                         disabled={submitting || reviewForm.rating === 0}
-                        className="bg-[#f5c518] text-black px-6 py-2 rounded-lg font-semibold hover:bg-[#e5b91f] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="theme-button-primary px-6 py-2 rounded-lg font-semibold hover:theme-button-primary-hover disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         <FaSave />
                         {submitting
@@ -336,7 +336,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
                       <button
                         type="button"
                         onClick={cancelEditing}
-                        className="bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-500 flex items-center gap-2"
+                        className="theme-button-secondary px-6 py-2 rounded-lg font-semibold hover:theme-button-secondary-hover flex items-center gap-2"
                       >
                         <FaTimes />
                         Cancel
@@ -349,7 +349,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-400 mb-4">
+            <p className="theme-text-secondary mb-4">
               Sign in to rate and review this movie
             </p>
           </div>
@@ -357,8 +357,8 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
       </div>
 
       {/* Other Reviews Section */}
-      <div className="bg-[#232323] rounded-xl p-6">
-        <h3 className="text-xl font-bold text-white mb-4">
+      <div className="theme-bg-secondary rounded-xl p-6">
+        <h3 className="text-xl font-bold theme-text-primary mb-4">
           Reviews ({reviews.length})
         </h3>
 
@@ -367,25 +367,25 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
             {reviews.map((review) => (
               <div
                 key={review._id}
-                className="bg-[#1a1a1a] rounded-lg p-4 border-l-4 border-[#f5c518]"
+                className="theme-bg-tertiary rounded-lg p-4 border-l-4 theme-border-accent"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-3">
                     <StarRating rating={review.rating} size="small" />
-                    <span className="font-bold text-[#f5c518]">
+                    <span className="font-bold theme-accent">
                       {review.rating}/10
                     </span>
-                    <span className="text-gray-400 text-sm">
+                    <span className="theme-text-secondary text-sm">
                       by {review.userId}
                     </span>
                   </div>
-                  <div className="text-gray-400 text-sm">
+                  <div className="theme-text-secondary text-sm">
                     {new Date(review.createdAt).toLocaleDateString()}
                   </div>
                 </div>
 
                 {review.review && (
-                  <p className="text-gray-300 leading-relaxed mb-3">
+                  <p className="theme-text-primary leading-relaxed mb-3">
                     {review.review}
                   </p>
                 )}
@@ -398,7 +398,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
                         review.helpfulBy?.includes("currentUser")
                       )
                     }
-                    className="text-gray-400 hover:text-[#f5c518] text-sm flex items-center gap-1"
+                    className="theme-text-secondary hover:theme-accent text-sm flex items-center gap-1"
                     disabled={!isSignedIn}
                   >
                     👍 Helpful ({review.helpfulVotes})
@@ -408,7 +408,7 @@ export default function ReviewSection({ movieId, onReviewUpdate }) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8 theme-text-secondary">
             No reviews yet. Be the first to review this movie!
           </div>
         )}

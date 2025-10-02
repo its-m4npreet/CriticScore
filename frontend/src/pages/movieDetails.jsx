@@ -258,9 +258,9 @@ export default function MovieDetailPage({ allMovies }) {
 
   if (loading) {
     return (
-      <section className="px-8 py-6">
+      <section className="px-8 py-6 theme-bg-primary">
         <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f5c518]"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 theme-border-accent"></div>
         </div>
       </section>
     );
@@ -268,7 +268,7 @@ export default function MovieDetailPage({ allMovies }) {
 
   if (error || !movie) {
     return (
-      <section className="px-8 py-6">
+      <section className="px-8 py-6 theme-bg-primary">
         <div className="text-center text-red-400 text-xl">
           {error || "Movie not found"}
         </div>
@@ -277,10 +277,10 @@ export default function MovieDetailPage({ allMovies }) {
   }
 
   return (
-    <section className="px-8 py-6">
+    <section className="px-8 py-6 theme-bg-primary theme-text-primary">
       {/* Notification Toast */}
       {notification && (
-        <div className="fixed top-4 right-4 bg-[#f5c518] text-black px-6 py-3 rounded-lg shadow-lg z-50 font-semibold">
+        <div className="fixed top-4 right-4 theme-bg-accent theme-text-accent-contrast px-6 py-3 rounded-lg shadow-lg z-50 font-semibold">
           {notification}
         </div>
       )}
@@ -290,7 +290,7 @@ export default function MovieDetailPage({ allMovies }) {
         <div className="mb-6">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-[#f5c518] hover:text-[#e5b91f] transition-colors"
+            className="inline-flex items-center gap-2 theme-accent hover:theme-accent-hover transition-colors"
           >
             <FaArrowLeft /> Back to Movies
           </Link>
@@ -298,7 +298,7 @@ export default function MovieDetailPage({ allMovies }) {
 
         {/* Hero Section */}
         <div className="relative mb-8 rounded-2xl overflow-hidden shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent z-10"></div>
+          <div className="absolute inset-0 theme-gradient-overlay z-10"></div>
           <img
             src={movie.poster}
             alt={movie.title}
@@ -309,35 +309,35 @@ export default function MovieDetailPage({ allMovies }) {
               <img
                 src={movie.poster}
                 alt={movie.title}
-                className="w-48 h-72 object-cover rounded-xl shadow-2xl border-2 border-[#f5c518]"
+                className="w-48 h-72 object-cover rounded-xl shadow-2xl border-2 theme-border-accent"
               />
               <div className="flex-1">
-                <h1 className="text-5xl font-bold text-[#f5c518] mb-4 drop-shadow-lg">
+                <h1 className="text-5xl font-bold theme-accent mb-4 drop-shadow-lg">
                   {movie.title}
                 </h1>
-                <p className="text-gray-200 text-lg mb-6 leading-relaxed max-w-2xl">
+                <p className="theme-text-secondary text-lg mb-6 leading-relaxed max-w-2xl">
                   {movie.description}
                 </p>
 
                 {/* Movie Info */}
                 <div className="flex items-center gap-6 mb-6">
-                  <span className="text-lg font-bold bg-[#f5c518] text-black px-3 py-1 rounded">
+                  <span className="text-lg font-bold theme-bg-accent theme-text-accent-contrast px-3 py-1 rounded">
                     {new Date(movie.releaseDate).getFullYear()}
                   </span>
                   <div className="flex items-center gap-2">
-                    <FaStar className="text-[#f5c518]" />
-                    <span className="text-white text-lg font-semibold">
+                    <FaStar className="theme-accent" />
+                    <span className="theme-text-primary text-lg font-semibold">
                       {movie.averageRating
                         ? movie.averageRating.toFixed(1)
                         : "N/A"}
                       /10
                     </span>
-                    <span className="text-gray-400 text-sm">
+                    <span className="theme-text-secondary text-sm">
                       ({movie.totalRatings || 0}{" "}
                       {movie.totalRatings === 1 ? "rating" : "ratings"})
                     </span>
                   </div>
-                  <span className="bg-[#232323] text-[#f5c518] px-3 py-1 rounded border border-[#f5c518]">
+                  <span className="theme-bg-secondary theme-accent px-3 py-1 rounded border theme-border-accent">
                     {movie.genre?.[0] || "Drama"}
                   </span>
                 </div>
@@ -348,8 +348,8 @@ export default function MovieDetailPage({ allMovies }) {
                     onClick={handleWatchlistToggle}
                     className={`px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
                       isWatchlisted
-                        ? "bg-[#f5c518] text-black"
-                        : "bg-[#232323] text-[#f5c518] border border-[#f5c518] hover:bg-[#f5c518] hover:text-black"
+                        ? "theme-bg-accent theme-text-accent-contrast"
+                        : "theme-bg-secondary theme-accent border theme-border-accent hover:theme-bg-accent hover:theme-text-accent-contrast"
                     }`}
                   >
                     <FaBookmark />{" "}
@@ -360,14 +360,14 @@ export default function MovieDetailPage({ allMovies }) {
                     className={`p-3 rounded-lg transition-colors ${
                       isLiked
                         ? "bg-red-600 text-white"
-                        : "bg-[#232323] text-gray-400 hover:text-red-500"
+                        : "theme-bg-secondary theme-text-secondary hover:text-red-500"
                     }`}
                   >
                     <FaHeart />
                   </button>
                   <button
                     onClick={handleShare}
-                    className="p-3 bg-[#232323] text-gray-400 rounded-lg hover:text-[#f5c518] transition-colors"
+                    className="p-3 theme-bg-secondary theme-text-secondary rounded-lg hover:theme-accent transition-colors"
                     title="Share this movie"
                   >
                     <FaShare />
@@ -382,74 +382,74 @@ export default function MovieDetailPage({ allMovies }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             {/* Movie Overview */}
-            <div className="bg-[#232323] rounded-xl p-8 mb-8">
+            <div className="theme-bg-secondary rounded-xl p-8 mb-8">
               <div className="flex items-center gap-4 mb-6">
-                <span className="w-1 bg-[#f5c518] h-6 inline-block rounded-full"></span>
-                <h2 className="text-2xl font-bold text-white">Overview</h2>
+                <span className="w-1 theme-bg-accent h-6 inline-block rounded-full"></span>
+                <h2 className="text-2xl font-bold theme-text-primary">Overview</h2>
               </div>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-3">
+                  <h3 className="text-xl font-semibold theme-text-primary mb-3">
                     Synopsis
                   </h3>
-                  <p className="text-gray-300 leading-relaxed">
+                  <p className="theme-text-secondary leading-relaxed">
                     {movie.description}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <h4 className="text-lg font-semibold text-[#f5c518] mb-2">
+                    <h4 className="text-lg font-semibold theme-accent mb-2">
                       Details
                     </h4>
-                    <div className="space-y-2 text-gray-300">
+                    <div className="space-y-2 theme-text-secondary">
                       <p>
-                        <span className="text-white font-medium">
+                        <span className="theme-text-primary font-medium">
                           Release Year:
                         </span>{" "}
                         {new Date(movie.releaseDate).getFullYear()}
                       </p>
                       <p>
-                        <span className="text-white font-medium">Genre:</span>{" "}
+                        <span className="theme-text-primary font-medium">Genre:</span>{" "}
                         {movie.genre?.join(", ") || "N/A"}
                       </p>
                       <p>
-                        <span className="text-white font-medium">
+                        <span className="theme-text-primary font-medium">
                           Duration:
                         </span>{" "}
                         {movie.duration ? `${movie.duration} min` : "N/A"}
                       </p>
                       <p>
-                        <span className="text-white font-medium">
+                        <span className="theme-text-primary font-medium">
                           Language:
                         </span>{" "}
                         {movie.language || "N/A"}
                       </p>
                       <p>
-                        <span className="text-white font-medium">Country:</span>{" "}
+                        <span className="theme-text-primary font-medium">Country:</span>{" "}
                         {movie.country || "N/A"}
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-semibold text-[#f5c518] mb-2">
+                    <h4 className="text-lg font-semibold theme-accent mb-2">
                       Cast & Crew
                     </h4>
-                    <div className="space-y-2 text-gray-300">
+                    <div className="space-y-2 theme-text-secondary">
                       <p>
-                        <span className="text-white font-medium">
+                        <span className="theme-text-primary font-medium">
                           Director:
                         </span>{" "}
                         {movie.director || "N/A"}
                       </p>
                       <p>
-                        <span className="text-white font-medium">Cast:</span>{" "}
+                        <span className="theme-text-primary font-medium">Cast:</span>{" "}
                         {movie.cast?.join(", ") || "N/A"}
                       </p>
                       {movie.budget && (
                         <p>
-                          <span className="text-white font-medium">
+                          <span className="theme-text-primary font-medium">
                             Budget:
                           </span>{" "}
                           ${(movie.budget / 1000000).toFixed(1)}M
@@ -457,7 +457,7 @@ export default function MovieDetailPage({ allMovies }) {
                       )}
                       {movie.boxOffice && (
                         <p>
-                          <span className="text-white font-medium">
+                          <span className="theme-text-primary font-medium">
                             Box Office:
                           </span>{" "}
                           ${(movie.boxOffice / 1000000).toFixed(1)}M
@@ -479,14 +479,14 @@ export default function MovieDetailPage({ allMovies }) {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Stats */}
-            <div className="bg-[#232323] rounded-xl p-6">
-              <h3 className="text-xl font-bold text-[#f5c518] mb-4">
+            <div className="theme-bg-secondary rounded-xl p-6">
+              <h3 className="text-xl font-bold theme-accent mb-4">
                 Quick Stats
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">CriticScore Rating</span>
-                  <span className="text-white font-semibold">
+                  <span className="theme-text-secondary">CriticScore Rating</span>
+                  <span className="theme-text-primary font-semibold">
                     {movie.averageRating
                       ? movie.averageRating.toFixed(1)
                       : "N/A"}
@@ -494,20 +494,20 @@ export default function MovieDetailPage({ allMovies }) {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Total Ratings</span>
-                  <span className="text-white font-semibold">
+                  <span className="theme-text-secondary">Total Ratings</span>
+                  <span className="theme-text-primary font-semibold">
                     {movie.totalRatings || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Release Date</span>
-                  <span className="text-white font-semibold">
+                  <span className="theme-text-secondary">Release Date</span>
+                  <span className="theme-text-primary font-semibold">
                     {new Date(movie.releaseDate).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Status</span>
-                  <span className="text-white font-semibold">
+                  <span className="theme-text-secondary">Status</span>
+                  <span className="theme-text-primary font-semibold">
                     {movie.isActive ? "Available" : "Unavailable"}
                   </span>
                 </div>
@@ -515,8 +515,8 @@ export default function MovieDetailPage({ allMovies }) {
             </div>
 
             {/* Movie Poster */}
-            <div className="bg-[#232323] rounded-xl p-6">
-              <h3 className="text-xl font-bold text-[#f5c518] mb-4">Poster</h3>
+            <div className="theme-bg-secondary rounded-xl p-6">
+              <h3 className="text-xl font-bold theme-accent mb-4">Poster</h3>
               <img
                 src={movie.poster}
                 alt={movie.title}

@@ -37,7 +37,7 @@ function MovieCard({ movie }) {
 
 
   return (
-    <div className="bg-[#232323] rounded-xl shadow-2xl overflow-hidden hover:border-[#f5c518] border-2 border-transparent transition-all duration-200 relative group h-[360px] w-[240px] flex flex-col flex-shrink-0">
+    <div className="bg-[var(--bg-secondary)] rounded-xl shadow-2xl overflow-hidden hover:border-[var(--accent-color)] border-2 border-transparent transition-all duration-200 relative group h-[360px] w-[240px] flex flex-col flex-shrink-0">
       <Link to={`/movie/${movieId}`} className="flex-shrink-0">
         <img
           src={movie.image || movie.poster}
@@ -71,14 +71,14 @@ function MovieCard({ movie }) {
 
       <div className="p-4 flex flex-col flex-grow">
         {/* Title with fixed height and overflow handling */}
-        <h4 className="text-lg font-extrabold mb-2 text-[#f5c518] drop-shadow line-clamp-2 h-14 flex items-start">
+        <h4 className="text-lg font-extrabold mb-2 text-[var(--accent-color)] drop-shadow line-clamp-2 h-14 flex items-start">
           <span className="overflow-hidden">
             {movie.name || movie.title}
           </span>
         </h4>
         
         {/* Description with fixed height */}
-        <p className="text-gray-300 text-sm mb-3 line-clamp-3 h-16 overflow-hidden">
+        <p className="text-[var(--text-secondary)] text-sm mb-3 line-clamp-3 h-16 overflow-hidden">
           {movie.desc || movie.description}
         </p>
         
@@ -88,7 +88,7 @@ function MovieCard({ movie }) {
         {/* Bottom section with consistent positioning */}
         <div className="mt-auto">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold bg-[#f5c518] text-black px-2 py-1 rounded shadow whitespace-nowrap">
+            <span className="text-xs font-bold bg-[var(--accent-color)] text-[var(--bg-primary)] px-2 py-1 rounded shadow whitespace-nowrap">
               {movie.year ||
                 (movie.releaseDate
                   ? new Date(movie.releaseDate).getFullYear()
@@ -101,7 +101,7 @@ function MovieCard({ movie }) {
 
           {/* Show rating count if available */}
           {movie.ratings && movie.ratings.length > 0 && (
-            <div className="text-xs text-gray-400 text-center">
+            <div className="text-xs text-[var(--text-secondary)] text-center">
               {movie.ratings.length} rating{movie.ratings.length !== 1 ? "s" : ""}
             </div>
           )}

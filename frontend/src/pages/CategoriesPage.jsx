@@ -80,13 +80,13 @@ export default function CategoriesPage() {
   };
 
   return (
-    <section className="px-8 py-6">
-      <div className="rounded-2xl overflow-hidden shadow-2xl border-2 border-[#f5c518] relative h-56 bg-gradient-to-r from-[#232323] to-[#141414] flex items-center justify-center mb-8">
+    <section className="px-8 py-6 theme-bg-primary theme-text-primary">
+      <div className="rounded-2xl overflow-hidden shadow-2xl border-2 theme-border-accent relative h-56 theme-bg-secondary flex items-center justify-center mb-8">
         <div className="relative z-10 text-center">
-          <h2 className="text-4xl font-extrabold mb-2 tracking-wide text-[#f5c518] drop-shadow-lg">
+          <h2 className="text-4xl font-extrabold mb-2 tracking-wide theme-accent drop-shadow-lg">
             🎬 Browse by Categories
           </h2>
-          <p className="text-gray-200 text-lg drop-shadow">
+          <p className="theme-text-secondary text-lg drop-shadow">
             Discover movies by your favorite genres
           </p>
         </div>
@@ -94,7 +94,7 @@ export default function CategoriesPage() {
 
       {/* Genre Filter */}
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-[#f5c518] mb-4">Select Genre</h3>
+        <h3 className="text-2xl font-bold theme-accent mb-4">Select Genre</h3>
         <div className="flex flex-wrap gap-3">
           {genres.map((genre) => (
             <button
@@ -102,8 +102,8 @@ export default function CategoriesPage() {
               onClick={() => setSelectedGenre(genre)}
               className={`px-4 py-2 rounded-full font-semibold transition-all duration-200 ${
                 selectedGenre === genre
-                  ? "bg-[#f5c518] text-black shadow-lg transform scale-105"
-                  : "bg-[#232323] text-gray-300 hover:bg-[#333] hover:text-white border border-gray-600"
+                  ? "theme-bg-accent theme-text-on-accent shadow-lg transform scale-105"
+                  : "theme-bg-secondary theme-text-secondary hover:theme-bg-hover theme-border"
               }`}
             >
               {genre === "all"
@@ -116,7 +116,7 @@ export default function CategoriesPage() {
 
       {/* Results */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-white tracking-wide">
+        <h3 className="text-2xl font-bold theme-text-primary tracking-wide">
           {selectedGenre === "all"
             ? `All Movies (${filteredMovies.length})`
             : `${selectedGenre} Movies (${filteredMovies.length})`}
@@ -124,8 +124,8 @@ export default function CategoriesPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center w-full h-32 text-[#f5c518] text-xl font-bold">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f5c518]"></div>
+        <div className="flex items-center justify-center w-full h-32 theme-accent text-xl font-bold">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 theme-border-accent"></div>
         </div>
       ) : error ? (
         <div className="flex items-center justify-center w-full h-32 text-red-400 text-xl font-bold">

@@ -140,10 +140,10 @@ export default function WatchlistPage() {
       <section className="px-8 py-6">
         <div className="text-center py-20">
           <div className="text-8xl mb-6">🔐</div>
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-bold theme-text-primary mb-4">
             Sign In Required
           </h2>
-          <p className="text-gray-400 text-lg mb-8">
+          <p className="theme-text-secondary text-lg mb-8">
             You need to sign in to view and manage your watchlist
           </p>
           <button className="bg-[#f5c518] text-black px-8 py-3 rounded-lg font-semibold hover:bg-yellow-400 transition-colors">
@@ -155,20 +155,20 @@ export default function WatchlistPage() {
   }
 
   return (
-    <section className="px-8 py-6">
-      <div className="rounded-2xl overflow-hidden shadow-2xl border-2 border-[#f5c518] relative h-56 bg-gradient-to-r from-[#232323] to-[#141414] flex items-center justify-center mb-8">
+    <section className="px-8 py-6 theme-bg-primary">
+      <div className="rounded-2xl overflow-hidden shadow-2xl border-2 theme-border-accent relative h-56 theme-bg-secondary flex items-center justify-center mb-8">
         <div className="relative z-10 text-center">
-          <h2 className="text-4xl font-extrabold mb-2 tracking-wide text-[#f5c518] drop-shadow-lg">
+          <h2 className="text-4xl font-extrabold mb-2 tracking-wide theme-accent drop-shadow-lg">
             📚 My Watchlist
           </h2>
-          <p className="text-gray-200 text-lg drop-shadow">
+          <p className="theme-text-secondary text-lg drop-shadow">
             Movies you want to watch later
           </p>
         </div>
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-white tracking-wide">
+        <h3 className="text-2xl font-bold theme-text-primary tracking-wide">
           Your Watchlist ({watchlist.length} movies)
         </h3>
         {watchlist.length > 0 && (
@@ -181,60 +181,65 @@ export default function WatchlistPage() {
         )}
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center w-full h-32 text-[#f5c518] text-xl font-bold">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f5c518]"></div>
-        </div>
-      ) : error ? (
-        <div className="flex items-center justify-center w-full h-32 text-red-400 text-xl font-bold">
-          {error}
-        </div>
-      ) : watchlist.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="text-8xl mb-6">📝</div>
-          <h3 className="text-3xl font-semibold mb-4 text-gray-300">
-            Your Watchlist is Empty
-          </h3>
-          <p className="text-gray-400 text-lg mb-8">
-            Start adding movies to your watchlist by clicking the bookmark icon
-            on movie cards
-          </p>
-          <div className="bg-[#232323] border border-gray-600 rounded-lg p-6 max-w-md mx-auto">
-            <h4 className="text-[#f5c518] font-semibold mb-2">💡 Pro Tip:</h4>
-            <p className="text-gray-300 text-sm">
-              Browse movies and click the 📚 icon to add them to your watchlist
-              for later viewing
-            </p>
+      {/* Watchlist Content Area */}
+      <div className="min-h-[400px] relative">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-96 theme-accent">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 theme-border-accent mb-4"></div>
+            <span className="text-xl font-bold theme-text-primary">Loading your watchlist...</span>
+            <span className="text-sm theme-text-secondary mt-2">Please wait while we fetch your movies</span>
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-6">
-          {watchlist.map((movie, index) => (
-            <div key={movie._id || movie.movieId || movie.id || `movie-${index}`} className="relative">
-              <MovieCard movie={movie} />
-              <button
-                onClick={() => removeFromWatchlist(movie._id || movie.movieId || movie.id)}
-                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-colors z-10"
-                title="Remove from watchlist"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+        ) : error ? (
+          <div className="flex items-center justify-center w-full h-32 text-red-400 text-xl font-bold">
+            {error}
+          </div>
+        ) : watchlist.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-8xl mb-6">📝</div>
+            <h3 className="text-3xl font-semibold mb-4 theme-text-primary">
+              Your Watchlist is Empty
+            </h3>
+            <p className="theme-text-secondary text-lg mb-8">
+              Start adding movies to your watchlist by clicking the bookmark icon
+              on movie cards
+            </p>
+            <div className="theme-bg-secondary theme-border rounded-lg p-6 max-w-md mx-auto">
+              <h4 className="theme-accent font-semibold mb-2">💡 Pro Tip:</h4>
+              <p className="theme-text-primary text-sm">
+                Browse movies and click the 📚 icon to add them to your watchlist
+                for later viewing
+              </p>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {watchlist.map((movie, index) => (
+              <div key={movie._id || movie.movieId || movie.id || `movie-${index}`} className="relative">
+                <MovieCard movie={movie} />
+                <button
+                  onClick={() => removeFromWatchlist(movie._id || movie.movieId || movie.id)}
+                  className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-colors z-10"
+                  title="Remove from watchlist"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
