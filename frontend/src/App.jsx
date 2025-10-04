@@ -19,6 +19,7 @@ import TopRatedPage from "./pages/TopRatedPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import WatchlistPage from "./pages/WatchlistPage";
 import SettingsPage from "./pages/SettingsPage";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function GetToken() {
   const { getToken } = useAuth();
@@ -82,6 +83,9 @@ function App() {
   const [allMovies, setAllMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
   const { getToken } = useAuth();
@@ -92,6 +96,38 @@ function App() {
       window.__clerk_token_getter = getToken;
     }
   }, [getToken]);
+
+  // Search function
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    
+    if (value.length < 2) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    // Search movies by name/title
+    const filtered = allMovies.filter(movie =>
+      movie.title?.toLowerCase().includes(value.toLowerCase()) ||
+      movie.name?.toLowerCase().includes(value.toLowerCase())
+    );
+    
+    setSearchResults(filtered);
+    setShowResults(true);
+  };
+
+  // Close search results when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.search-container')) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   React.useEffect(() => {
     const loadMovies = async () => {
@@ -115,12 +151,56 @@ function App() {
             <main className="flex-1 flex flex-col theme-bg-primary ml-60">
                 <header className="flex items-center justify-between px-8 py-4 theme-bg-primary border-b theme-border">
           <div className="flex items-center gap-4 justify-between w-full">
-            <input
-              type="search"
-              placeholder="Search movies, shows, people..."
-              className="settings-input px-4 py-2 rounded-lg w-[30rem] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] placeholder-[var(--text-secondary)]"
-              disabled={currentPath === "/settings"}
-            />
+            <div className="relative search-container">
+              <input
+                type="search"
+                placeholder="Search movies by name..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="settings-input px-4 py-2 rounded-lg w-[30rem] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] placeholder-[var(--text-secondary)]"
+                disabled={currentPath === "/settings"}
+              />
+              
+              {/* Search Results */}
+              {showResults && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+                  {searchResults.map((movie) => (
+                    <div
+                      key={movie._id || movie.id}
+                      className="flex items-center gap-3 p-3 hover:bg-[var(--bg-tertiary)] cursor-pointer border-b border-[var(--border-color)] last:border-b-0"
+                      onClick={() => {
+                        window.location.href = `/movie/${movie._id || movie.id}`;
+                        setShowResults(false);
+                        setSearchQuery("");
+                      }}
+                    >
+                      <img
+                        src={movie.poster || movie.image}
+                        alt={movie.title || movie.name}
+                        className="w-12 h-16 object-cover rounded"
+                      />
+                      <div>
+                        <h4 className="font-semibold text-[var(--text-primary)]">
+                          {movie.title || movie.name}
+                        </h4>
+                        <p className="text-sm text-[var(--text-secondary)]">
+                          {movie.year || new Date(movie.releaseDate).getFullYear()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* No Results */}
+              {showResults && searchResults.length === 0 && searchQuery.length >= 2 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-4 z-50">
+                  <p className="text-[var(--text-secondary)] text-center">
+                    No movies found for "{searchQuery}"
+                  </p>
+                </div>
+              )}
+            </div>
             <div className="flex items-center gap-8">
               <SignedOut>
                 <SignInButton className="bg-[var(--accent-color)] text-[var(--bg-primary)] px-4 py-2 rounded-lg cursor-pointer hover:opacity-90 transition-all" />
@@ -149,6 +229,7 @@ function App() {
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/test" element={<TestPage />} />
           <Route
             path="/movie/:id"

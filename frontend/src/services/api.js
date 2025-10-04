@@ -200,6 +200,80 @@ class ApiService {
       return false;
     }
   }
+
+  // Admin Methods for Movie Management
+  async createMovie(movieData) {
+    try {
+      console.log("🎬 Creating new movie:", movieData.title);
+      return await this.request("/api/admin/movies", {
+        method: "POST",
+        body: JSON.stringify(movieData),
+      });
+    } catch (error) {
+      console.error("Error creating movie:", error);
+      throw error;
+    }
+  }
+
+  async updateMovie(movieId, movieData) {
+    try {
+      console.log("🎬 Updating movie:", movieId);
+      return await this.request(`/api/admin/movies/${movieId}`, {
+        method: "PUT",
+        body: JSON.stringify(movieData),
+      });
+    } catch (error) {
+      console.error("Error updating movie:", error);
+      throw error;
+    }
+  }
+
+  async deleteMovie(movieId) {
+    try {
+      console.log("🎬 Deleting movie:", movieId);
+      return await this.request(`/api/admin/movies/${movieId}`, {
+        method: "DELETE",
+      });
+    } catch (error) {
+      console.error("Error deleting movie:", error);
+      throw error;
+    }
+  }
+
+  async getAdminStats() {
+    try {
+      console.log("📊 Fetching admin statistics");
+      return await this.request("/api/admin/stats");
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      throw error;
+    }
+  }
+
+  async toggleMovieFeatured(movieId) {
+    try {
+      console.log("⭐ Toggling featured status for movie:", movieId);
+      return await this.request(`/api/admin/movies/${movieId}/featured`, {
+        method: "PATCH",
+      });
+    } catch (error) {
+      console.error("Error toggling featured status:", error);
+      throw error;
+    }
+  }
+
+  async bulkUpdateMovies(movieIds, updateData) {
+    try {
+      console.log("🔄 Bulk updating movies:", movieIds.length);
+      return await this.request("/api/admin/movies/bulk", {
+        method: "PATCH",
+        body: JSON.stringify({ movieIds, updateData }),
+      });
+    } catch (error) {
+      console.error("Error bulk updating movies:", error);
+      throw error;
+    }
+  }
 }
 
 export const apiService = new ApiService();
