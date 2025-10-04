@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import MovieCard from "../components/MovieCard";
 import ApiService from "../services/api";
+import { GenreIcon } from "../components/Icons";
 
 export default function CategoriesPage() {
   const [movies, setMovies] = useState([]);
@@ -13,26 +14,46 @@ export default function CategoriesPage() {
     const fetchMovies = async () => {
       try {
         setLoading(true);
+        console.log("[Categories] Fetching movies for categories page...");
         const response = await ApiService.getMovies();
-        const allMovies = Array.isArray(response) ? response : [];
+        console.log("📡 API Response:", response);
+        
+        // Handle different response structures
+        let allMovies = [];
+        if (Array.isArray(response)) {
+          allMovies = response;
+        } else if (response && response.movies && Array.isArray(response.movies)) {
+          allMovies = response.movies;
+        } else if (response && response.data && Array.isArray(response.data)) {
+          allMovies = response.data;
+        }
+        
+        console.log("[Categories] Processed movies:", allMovies.length, allMovies);
         setMovies(allMovies);
 
         // Extract unique genres
         const allGenres = new Set();
         allMovies.forEach((movie) => {
-          if (movie.genre) {
+          console.log("[Categories] Movie genre:", movie.title, "=>", movie.genre, movie.category);
+          
+          // Check both 'genre' and 'category' fields
+          const genreField = movie.genre || movie.category;
+          if (genreField) {
             // Handle both string and array genres
-            if (Array.isArray(movie.genre)) {
-              movie.genre.forEach((g) => allGenres.add(g));
-            } else if (typeof movie.genre === "string") {
-              movie.genre.split(",").forEach((g) => allGenres.add(g.trim()));
+            if (Array.isArray(genreField)) {
+              genreField.forEach((g) => allGenres.add(g));
+            } else if (typeof genreField === "string") {
+              genreField.split(",").forEach((g) => allGenres.add(g.trim()));
             }
           }
         });
-        setGenres(["all", ...Array.from(allGenres).sort()]);
+        
+        const sortedGenres = ["all", ...Array.from(allGenres).sort()];
+        console.log("🏷️ Available genres:", sortedGenres);
+        setGenres(sortedGenres);
       } catch (err) {
         setError("Failed to load movies");
-        console.error("Error fetching movies:", err);
+        console.error("[Categories] Error fetching movies:", err);
       } finally {
         setLoading(false);
       }
@@ -41,43 +62,47 @@ export default function CategoriesPage() {
     fetchMovies();
   }, []);
 
-  const filteredMovies =
-    selectedGenre === "all"
-      ? movies
-      : movies.filter((movie) => {
-          if (!movie.genre) return false;
-          if (Array.isArray(movie.genre)) {
-            return movie.genre.includes(selectedGenre);
-          }
-          if (typeof movie.genre === "string") {
-            return movie.genre
-              .split(",")
-              .map((g) => g.trim())
-              .includes(selectedGenre);
-          }
-          return false;
-        });
+  const filteredMovies = useMemo(() => {
+    console.log("[Categories] Filtering movies for genre:", selectedGenre);
+    console.log("📚 Total movies to filter:", movies.length);
+    
+    if (selectedGenre === "all") {
+      console.log("[Categories] Showing all movies:", movies.length);
+      return movies;
+    }
+    
+    const filtered = movies.filter((movie) => {
+      // Check both 'genre' and 'category' fields
+      const genreField = movie.genre || movie.category;
+      
+      if (!genreField) {
+        console.log("⚠️ Movie has no genre/category:", movie.title);
+        return false;
+      }
+      
+      let hasGenre = false;
+      
+      if (Array.isArray(genreField)) {
+        hasGenre = genreField.includes(selectedGenre);
+      } else if (typeof genreField === "string") {
+        hasGenre = genreField
+          .split(",")
+          .map((g) => g.trim())
+          .includes(selectedGenre);
+      }
+      
+      if (hasGenre) {
+        console.log("[Categories] Movie matches genre:", movie.title, genreField);
+      }
+      
+      return hasGenre;
+    });
+    
+    console.log("[Categories] Filtered movies count:", filtered.length);
+    return filtered;
+  }, [movies, selectedGenre]);
 
-  const genreEmojis = {
-    Action: "💥",
-    Adventure: "🗺️",
-    Animation: "🎨",
-    Comedy: "😂",
-    Crime: "🔫",
-    Documentary: "📽️",
-    Drama: "🎭",
-    Family: "👨‍👩‍👧‍👦",
-    Fantasy: "🧙‍♂️",
-    History: "📜",
-    Horror: "👻",
-    Music: "🎵",
-    Mystery: "🔍",
-    Romance: "💕",
-    "Science Fiction": "🚀",
-    Thriller: "😰",
-    War: "⚔️",
-    Western: "🤠",
-  };
+  // Genre icons are now handled by the GenreIcon component
 
   return (
     <section className="px-8 py-6 theme-bg-primary theme-text-primary">
@@ -106,9 +131,11 @@ export default function CategoriesPage() {
                   : "theme-bg-secondary theme-text-secondary hover:theme-bg-hover theme-border"
               }`}
             >
-              {genre === "all"
-                ? "🎯 All Movies"
-                : `${genreEmojis[genre] || "🎬"} ${genre}`}
+              {genre === "all" ? (
+                <span className="flex items-center"><GenreIcon genre="all" size={18} className="mr-2 " />All Movies</span>
+              ) : (
+                <span className="flex items-center"><GenreIcon genre={genre} size={18} className="mr-2" />{genre}</span>
+              )}
             </button>
           ))}
         </div>
@@ -134,7 +161,7 @@ export default function CategoriesPage() {
       ) : filteredMovies.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">
-            {genreEmojis[selectedGenre] || "🎬"}
+            <GenreIcon genre={selectedGenre === "all" ? "Action" : selectedGenre} size={72} className="text-gray-400" />
           </div>
           <h3 className="text-2xl font-semibold mb-2 text-gray-300">
             No {selectedGenre === "all" ? "Movies" : selectedGenre + " Movies"}{" "}
@@ -147,7 +174,7 @@ export default function CategoriesPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredMovies.map((movie) => (
             <MovieCard key={movie._id} movie={movie} />
           ))}

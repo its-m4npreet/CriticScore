@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MovieCard from "../components/MovieCard";
 import ApiService from "../services/api";
+import { Icon } from "../components/Icons";
 
 export default function TrendingPage() {
   const [movies, setMovies] = useState([]);
@@ -82,7 +83,9 @@ export default function TrendingPage() {
           </div>
         ) : movies.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎬</div>
+            <div className="text-6xl mb-4">
+              <Icon name="trending" size={72} className="text-gray-400" />
+            </div>
             <h3 className="text-2xl font-semibold mb-2 text-gray-300">
               No Trending Movies Yet
             </h3>
@@ -101,7 +104,7 @@ export default function TrendingPage() {
                 <div className="mt-2 text-center">
                   <div className="flex justify-center items-center gap-2 text-sm text-gray-400">
                     <span className="flex items-center gap-1">
-                      ⭐ {movie.avgRating?.toFixed(1)}
+                      <Icon name="star" size={16} className="mr-1 text-yellow-400" />{movie.avgRating?.toFixed(1)}
                     </span>
                     <span>•</span>
                     <span>{movie.reviewCount} reviews</span>

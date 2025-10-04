@@ -215,7 +215,7 @@ export default function MovieDetailPage({ allMovies }) {
   const handleShare = async () => {
     const url = window.location.href;
     const title = `${movie.title} - CriticScore`;
-    const text = `${movie.description}\n\nRated ${movie.averageRating}/10 ⭐`;
+    const text = `${movie.description}\n\nRated ${movie.averageRating}/10 stars`;
 
     if (navigator.share) {
       try {

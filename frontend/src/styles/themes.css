@@ -371,3 +371,383 @@ body,
   25% { transform: translateX(-5px); }
   75% { transform: translateX(5px); }
 }
+
+/* ========== CLERK COMPONENT STYLING ========== */
+
+/* Dark Theme Clerk Styles */
+.dark-theme .cl-userButtonPopoverCard,
+.dark-theme .cl-modalContent,
+.dark-theme .cl-userButtonPopover,
+.dark-theme .cl-popoverContent {
+  background-color: var(--bg-secondary) !important;
+  /* border: 1px solid var(--border-color) !important; */
+  color: var(--text-primary) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 12px !important;
+}
+
+.dark-theme .cl-userButtonPopoverActionButton,
+.dark-theme .cl-modalCloseButton,
+.dark-theme .cl-userButtonPopoverActionButtonText {
+  color: var(--text-primary) !important;
+  background-color: transparent !important;
+}
+
+.dark-theme .cl-userButtonPopoverActionButton:hover {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--accent-color) !important;
+}
+
+.dark-theme .cl-userButtonPopoverFooter {
+  border-top: 1px solid var(--border-color) !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark-theme .cl-userButtonPopoverFooter .cl-userButtonPopoverActionButton {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .cl-userButtonPopoverFooter .cl-userButtonPopoverActionButton:hover {
+  color: var(--accent-color) !important;
+}
+
+/* Clerk Avatar and User Info */
+.dark-theme .cl-userButtonPopoverMain {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark-theme .cl-userButtonPopoverMainIdentifier {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .cl-userButtonPopoverMainIdentifierText {
+  color: var(--text-secondary) !important;
+}
+
+/* Light Theme Clerk Styles */
+.light-theme .cl-userButtonPopoverCard,
+.light-theme .cl-modalContent,
+.light-theme .cl-userButtonPopover,
+.light-theme .cl-popoverContent {
+  background-color: var(--bg-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .cl-userButtonPopoverActionButton,
+.light-theme .cl-modalCloseButton,
+.light-theme .cl-userButtonPopoverActionButtonText {
+  color: var(--text-primary) !important;
+  background-color: transparent !important;
+}
+
+.light-theme .cl-userButtonPopoverActionButton:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--accent-color) !important;
+}
+
+.light-theme .cl-userButtonPopoverFooter {
+  border-top: 1px solid var(--border-color) !important;
+  background-color: var(--bg-primary) !important;
+}
+
+/* General Clerk Styling (applies to both themes) */
+.cl-userButtonPopoverCard {
+  /* border-radius: 12px !important; */
+  padding: 0 !important;
+  min-width: 280px !important;
+}
+
+.cl-userButtonPopoverActionButton {
+  padding: 12px 16px !important;
+  /* border-radius: 8px !important; */
+  margin: 4px 8px !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+}
+
+.cl-userButtonPopoverActionButtonIcon {
+  opacity: 0.8 !important;
+}
+
+.cl-userButtonPopoverActionButton:hover .cl-userButtonPopoverActionButtonIcon {
+  opacity: 1 !important;
+}
+
+.cl-userButtonPopoverMain {
+  padding: 16px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.cl-userButtonPopoverFooter {
+  padding: 8px !important;
+}
+
+/* Clerk Modal Styles */
+.cl-modalContent {
+  /* border-radius: 16px !important; */
+  padding: 0 !important;
+}
+
+.cl-modalHeader {
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 20px 24px !important;
+}
+
+.cl-modalCloseButton {
+  color: var(--text-secondary) !important;
+}
+
+.cl-modalCloseButton:hover {
+  color: var(--text-primary) !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Clerk Form Elements */
+.cl-formFieldInput {
+  background-color: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+}
+
+.cl-formFieldInput:focus {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.2) !important;
+}
+
+.cl-formFieldLabel {
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+}
+
+/* .cl-button {
+  color: var(--bg-primary) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+} */
+/* 
+.cl-button:hover {
+  background-color: var(--accent-hover) !important;
+  transform: translateY(-1px) !important;
+} */
+
+/* Override Clerk's default theme detection */
+.cl-rootBox {
+  color-scheme: none !important;
+}
+
+/* Ensure smooth transitions */
+.cl-userButtonPopoverCard,
+.cl-userButtonPopoverActionButton,
+.cl-modalContent {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* ========== CLERK FOOTER CUSTOMIZATION ========== */
+
+/* Option 1: Hide Clerk branding completely */
+.cl-userButtonPopoverFooter {
+  display: none !important;
+}
+
+/* Option 2: If you want to keep it but style it (uncomment the styles below and comment out the display: none above) */
+/*
+.cl-userButtonPopoverFooter {
+  padding: 8px 16px !important;
+  text-align: center !important;
+}
+
+.cl-userButtonPopoverFooter .cl-userButtonPopoverActionButton {
+  font-size: 11px !important;
+  opacity: 0.6 !important;
+  padding: 4px 8px !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+}
+
+.dark-theme .cl-userButtonPopoverFooter .cl-userButtonPopoverActionButton {
+  color: var(--text-muted) !important;
+}
+
+.light-theme .cl-userButtonPopoverFooter .cl-userButtonPopoverActionButton {
+  color: var(--text-muted) !important;
+}
+*/
+
+/* Option 3: Completely remove the footer section (more aggressive) */
+.cl-userButtonPopover > div:last-child {
+  display: none !important;
+}
+
+/* Style the footer border to match when footer is hidden */
+.cl-userButtonPopoverMain {
+  border-bottom: none !important;
+}
+
+/* ========== CLERK ACCOUNT MANAGEMENT MODAL - DARK MODE ========== */
+
+/* Main modal content - Dark background */
+.dark-theme .cl-modalContent,
+.dark-theme .cl-card,
+.dark-theme .cl-profilePage,
+.dark-theme .cl-page,
+.dark-theme .cl-pageScrollBox,
+.dark-theme .cl-main {
+  background-color: var(--bg-secondary) !important;
+  color: white !important;
+}
+
+/* Modal backdrop */
+.dark-theme .cl-modalBackdrop {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Sidebar navigation - More specific targeting */
+.dark-theme .cl-navbar,
+.dark-theme .cl-modalContent .cl-navbar,
+.dark-theme .cl-profilePage .cl-navbar,
+.dark-theme div[class*="cl-navbar"] {
+  background-color: var(--bg-primary) !important;
+  
+}
+
+.dark-theme .cl-navbarButton,
+.dark-theme .cl-modalContent .cl-navbarButton,
+.dark-theme .cl-profilePage .cl-navbarButton,
+.dark-theme button[class*="cl-navbarButton"] {
+  background-color: var(--bg-primary) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.dark-theme .cl-navbarButton:hover,
+.dark-theme .cl-modalContent .cl-navbarButton:hover,
+.dark-theme .cl-profilePage .cl-navbarButton:hover {
+  background-color: var(--bg-tertiary) !important;
+  color: white !important;
+}
+
+.dark-theme .cl-navbarButton[aria-current="page"],
+.dark-theme .cl-navbarButton[data-active="true"],
+.dark-theme .cl-navbarButton[aria-selected="true"] {
+  background-color: var(--accent-color) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* Force sidebar background with broader selectors */
+.dark-theme .cl-modalContent > div:first-child,
+.dark-theme .cl-profilePage > div:first-child {
+  background-color: var(--bg-primary) !important;
+}
+
+/* Target any div within the sidebar area */
+.dark-theme .cl-modalContent > div:first-child *,
+.dark-theme .cl-profilePage > div:first-child * {
+  background-color: inherit !important;
+  color: white !important;
+}
+
+/* Content sections */
+.dark-theme .cl-profileSectionContent,
+.dark-theme .cl-profileSectionPrimaryContent {
+  background-color: var(--bg-secondary) !important;
+  color: white !important;
+}
+
+/* Headers and titles */
+.dark-theme .cl-headerTitle,
+.dark-theme .cl-headerSubtitle,
+.dark-theme .cl-profileSectionTitle,
+.dark-theme .cl-profileSectionTitleText {
+  color: white !important;
+}
+
+.dark-theme .cl-profileSectionSubtitle {
+  color: var(--text-secondary) !important;
+}
+
+/* Profile items and sections */
+.dark-theme .cl-profileSectionItem {
+  background-color: var(--bg-primary) !important;
+  /* border: 1px solid var(--border-color) !important; */
+  color: white !important;
+}
+
+.dark-theme .cl-profileSectionItemHeader,
+.dark-theme .cl-profileSectionItemText {
+  color: white !important;
+}
+
+/* Form elements */
+.dark-theme .cl-formFieldInput,
+.dark-theme .cl-input {
+  background-color: var(--bg-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: white !important;
+}
+
+.dark-theme .cl-formFieldLabel {
+  color: white !important;
+}
+
+/* Buttons */
+.dark-theme .cl-profileSectionItemButton,
+.dark-theme .cl-menuButton {
+  background-color: var(--bg-tertiary) !important;
+  color: white !important;
+  /* border: 1px solid var(--border-color) !important; */
+}
+
+.dark-theme .cl-profileSectionItemButton:hover,
+.dark-theme .cl-menuButton:hover {
+  background-color: var(--bg-primary) !important;
+  color: white !important;
+}
+
+/* Close button */
+.dark-theme .cl-modalCloseButton {
+  background-color: var(--bg-tertiary) !important;
+  color: white !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .cl-modalCloseButton:hover {
+  background-color: var(--error-color) !important;
+  color: white !important;
+}
+
+/* Any additional text elements */
+.dark-theme .cl-profilePage * {
+  color: white !important;
+}
+
+/* Override any remaining light backgrounds */
+.dark-theme .cl-profilePage,
+.dark-theme .cl-profilePage > *,
+.dark-theme .cl-profilePage * {
+  background-color: inherit !important;
+}
+
+/* Ensure white text for all text elements */
+.dark-theme .cl-profilePage p,
+.dark-theme .cl-profilePage span,
+.dark-theme .cl-profilePage div,
+.dark-theme .cl-profilePage label {
+  color: white !important;
+}
+.dark-theme  .cl-internal-1pcqqbp{
+  background: none !important;
+  color: white !important;
+  border-right: 1px solid var(--border-color) !important;
+}
+.cl-internal-1dauvpw{
+  display: none !important;
+}
+
+
+

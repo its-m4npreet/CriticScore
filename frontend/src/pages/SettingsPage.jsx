@@ -2,7 +2,8 @@ import React, { useState } from "react";
 // import  {  useEffect, useCallback } from "react";
 import { useUser, useClerk } from "@clerk/clerk-react";
 import ApiService from "../services/api";
-import { useTheme } from "../contexts/useTheme";
+import { useTheme } from "../hooks/useTheme";
+import { Icon } from "../components/Icons";
 
 export default function SettingsPage() {
   const { user, isSignedIn } = useUser();
@@ -176,22 +177,12 @@ export default function SettingsPage() {
 
   return (
     <section className="px-8 py-6 theme-bg-primary theme-text-primary min-h-screen">
-            <div className="rounded-2xl overflow-hidden shadow-2xl border-2 theme-border-hover relative h-56 theme-bg-secondary flex items-center justify-center mb-8">
-        <div className="relative z-10 text-center">
-          <h2 className="text-4xl font-extrabold mb-2 tracking-wide theme-accent drop-shadow-lg">
-            ⚙️ Settings
-          </h2>
-          <p className="theme-text-secondary text-lg drop-shadow">
-            Customize your CriticScore experience
-          </p>
-        </div>
-      </div>
-
+      
       <div className="max-w-4xl mx-auto">
         {/* User Profile Section */}
         <div className="settings-card rounded-lg p-6 mb-8">
           <h3 className="text-2xl font-bold theme-accent mb-4 flex items-center gap-2">
-            👤 Profile Information
+            <Icon name="profile" size={20} className="mr-2" /> Profile Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -224,7 +215,7 @@ export default function SettingsPage() {
         {/* User Statistics */}
         {/* <div className="settings-card rounded-lg p-6 mb-8">
           <h3 className="text-2xl font-bold theme-accent mb-4 flex items-center gap-2">
-            📊 Your Statistics
+            <Icon name="stats" size={20} className="mr-2" /> Your Statistics
           </h3>
           {loading ? (
             <div className="flex items-center justify-center py-8">
@@ -259,7 +250,7 @@ export default function SettingsPage() {
         {/* Display Preferences */}
         <div className="settings-card rounded-lg p-6 mb-8">
           <h3 className="text-2xl font-bold theme-accent mb-4 flex items-center gap-2">
-            🎨 Display Preferences
+            <Icon name="palette" size={20} className="mr-2" /> Display Preferences
           </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -325,7 +316,7 @@ export default function SettingsPage() {
         {/* Privacy & Content */}
         <div className="settings-card rounded-lg p-6 mb-8">
           <h3 className="text-2xl font-bold theme-accent mb-4 flex items-center gap-2">
-            🔒 Privacy & Content
+            <Icon name="lock" size={20} className="mr-2" /> Privacy & Content
           </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -420,7 +411,7 @@ export default function SettingsPage() {
               </label>
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <div>
                 <label className="theme-text-primary font-semibold">
                   Autoplay Trailers
@@ -446,7 +437,7 @@ export default function SettingsPage() {
                   }`}></div>
                 </div>
               </label>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -515,7 +506,7 @@ export default function SettingsPage() {
         {/* Data Management */}
         {/* <div className="settings-card rounded-lg p-6 mb-8">
           <h3 className="text-2xl font-bold theme-accent mb-4 flex items-center gap-2">
-            💾 Data Management
+            <Icon name="save" size={20} className="mr-2" /> Data Management
           </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -550,7 +541,7 @@ export default function SettingsPage() {
                 onClick={clearAllData}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all duration-200"
               >
-                🗑️ Clear Data
+                <Icon name="trash" size={18} className="mr-2" /> Clear Data
               </button>
             </div>
           </div>
@@ -566,19 +557,23 @@ export default function SettingsPage() {
                 : "settings-button hover:opacity-90"
             }`}
           >
-            {saved ? "✅ Saved!" : "💾 Save Settings"}
+            {saved ? (
+              <><Icon name="checkCircle" size={18} className="mr-2" /> Saved!</>
+            ) : (
+              <><Icon name="save" size={18} className="mr-2" /> Save Settings</>
+            )}
           </button>
           <button
             onClick={resetSettings}
             className="px-8 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition-all duration-200"
           >
-            🔄 Reset to Default
+            <Icon name="reset" size={18} className="mr-2" /> Reset to Default
           </button>
           <button
             onClick={loadUserStats}
             className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all duration-200"
           >
-            📊 Refresh Stats
+            <Icon name="refresh" size={18} className="mr-2" /> Refresh Stats
           </button>
         </div> */}
       </div>

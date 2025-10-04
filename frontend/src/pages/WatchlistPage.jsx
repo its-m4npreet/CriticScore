@@ -39,7 +39,7 @@ export default function WatchlistPage() {
             ? allMoviesResponse 
             : (allMoviesResponse?.movies || []);
           
-          console.log("📽️ Extracted movies array:", movies);
+          console.log("[Watchlist] Extracted movies array:", movies);
           console.log("All movies structure (first movie):", movies[0]);
           console.log("Movie _id type:", typeof movies[0]?._id, "Value:", movies[0]?._id);
           console.log("Looking for movie IDs:", movieIds);
@@ -54,9 +54,9 @@ export default function WatchlistPage() {
             const isMatch = movieIds.includes(movieIdStr);
             
             if (isMatch) {
-              console.log("✅ Found matching movie:", movie.title, "with ID:", movieId);
+              console.log("[Watchlist] Found matching movie:", movie.title, "with ID:", movieId);
             } else {
-              console.log("❌ No match for movie:", movie.title, "ID:", movieId);
+              console.log("[Watchlist] No match for movie:", movie.title, "ID:", movieId);
             }
             return isMatch;
           });

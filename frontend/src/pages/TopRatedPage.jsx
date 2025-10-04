@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MovieCard from "../components/MovieCard";
 import ApiService from "../services/api";
+import { Icon } from "../components/Icons";
 
 export default function TopRatedPage() {
   const [movies, setMovies] = useState([]);
@@ -62,7 +63,7 @@ export default function TopRatedPage() {
         )}
         <div className="relative z-10 text-center">
           <h2 className="text-4xl font-extrabold mb-2 tracking-wide text-[var(--accent-color)] drop-shadow-lg">
-            ⭐ Top Rated Movies
+            <Icon name="star" size={24} className="mr-2 text-yellow-400" />Top Rated Movies
           </h2>
           <p className="text-gray-200 text-lg drop-shadow">
             The highest rated movies according to our community
@@ -103,7 +104,9 @@ export default function TopRatedPage() {
           </div>
         ) : movies.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">⭐</div>
+            <div className="text-6xl mb-4">
+              <Icon name="star" size={72} className="text-yellow-400" />
+            </div>
             <h3 className="text-2xl font-semibold mb-2 text-gray-300">
               No Qualified Movies Yet
             </h3>
@@ -122,7 +125,7 @@ export default function TopRatedPage() {
                 <div className="mt-2 text-center">
                   <div className="flex justify-center items-center gap-2 text-sm">
                     <div className="flex items-center gap-1 text-[var(--accent-color)] font-semibold">
-                      ⭐ {movie.avgRating?.toFixed(1)}/10
+                      <Icon name="star" size={16} className="mr-1 text-yellow-400" />{movie.avgRating?.toFixed(1)}/10
                     </div>
                     <span className="text-gray-500">•</span>
                     <span className="text-gray-400">
