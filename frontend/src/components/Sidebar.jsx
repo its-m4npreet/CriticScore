@@ -12,13 +12,13 @@ import {
 import { NavLink } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import React from "react";
+import { isUserAdmin } from "../adminDetails";
 
 export default function Sidebar() {
   const { user } = useUser();
   
-  // Check if user is admin
-  const isAdmin = user?.publicMetadata?.role === "admin" || 
-                  user?.emailAddresses?.[0]?.emailAddress === "workgd6@gmail.com";
+  // Check if user is admin using centralized admin details
+  const isAdmin = isUserAdmin(user);
 
   const navLinks = [
     { name: "Home", icon: <FaHome />, path: "/" },

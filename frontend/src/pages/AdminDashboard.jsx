@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { Icon } from "../components/Icons";
 import ApiService from "../services/api";
+import { isUserAdmin } from "../adminDetails";
 
 export default function AdminDashboard() {
   const { user } = useUser();
@@ -30,9 +31,8 @@ export default function AdminDashboard() {
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Check if user is admin
-  const isAdmin = user?.publicMetadata?.role === "admin" || 
-                  user?.emailAddresses?.[0]?.emailAddress === "workgd6@gmail.com";
+  // Check if user is admin using centralized admin details
+  const isAdmin = isUserAdmin(user);
 
   // Load movies
   useEffect(() => {
