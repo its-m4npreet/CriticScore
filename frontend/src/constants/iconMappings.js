@@ -142,6 +142,7 @@ export const AppIcons = {
   chevronUp: FiChevronUp,
   externalLink: FiExternalLink,
   share: FiShare2,
+  image: FiFilm, // Adding missing image icon (using film as fallback)
 };
 
 // Genre Icons

@@ -99,20 +99,20 @@ function App() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Load movies function
+  const loadMovies = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchMovies();
+      setAllMovies(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   React.useEffect(() => {
-    const loadMovies = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchMovies();
-
-        setAllMovies(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadMovies();
   }, []);
 
@@ -208,7 +208,7 @@ function App() {
           </div>
         </header>
 
-        <GetToken />
+        {/* <GetToken /> */}
 
         <Routes>
           <Route
@@ -217,12 +217,12 @@ function App() {
               <HomePage allMovies={allMovies} loading={loading} error={error} />
             }
           />
-          <Route path="/trending" element={<TrendingPage allMovies={allMovies} loading={loading} error={error} />} />
-          <Route path="/top" element={<TopRatedPage allMovies={allMovies} loading={loading} error={error} />} />
+          <Route path="/trending" element={<TrendingPage key={allMovies.length} allMovies={allMovies} loading={loading} error={error} />} />
+          <Route path="/top" element={<TopRatedPage key={allMovies.length} allMovies={allMovies} loading={loading} error={error} />} />
           <Route path="/categories" element={<CategoriesPage allMovies={allMovies} loading={loading} error={error} />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminDashboard onMovieChange={() => loadMovies()} />} />
           <Route path="/test" element={<TestPage />} />
           <Route
             path="/movie/:id"

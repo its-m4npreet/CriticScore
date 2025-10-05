@@ -177,7 +177,18 @@ export const deleteUser = async (userId) => {
 export const isUserAdmin = async (userId) => {
   try {
     const user = await clerkClient.users.getUser(userId);
-    return user.publicMetadata?.role === "admin";
+    
+    // Get admin emails from environment variable
+    const adminEmailsString = process.env.ADMIN_EMAILS || "";
+    const ADMIN_EMAILS = adminEmailsString.split(",").map(email => email.trim()).filter(email => email);
+    
+    // Check if user email is in admin emails list
+    const userEmail = user.emailAddresses?.[0]?.emailAddress;
+    if (userEmail && ADMIN_EMAILS.includes(userEmail)) {
+      return true;
+    }
+
+    return false;
   } catch (error) {
     console.error("Error checking admin status:", error);
     return false;

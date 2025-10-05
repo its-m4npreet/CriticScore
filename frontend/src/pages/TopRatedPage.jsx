@@ -5,10 +5,13 @@ import { Icon } from "../components/Icons";
 export default function TopRatedPage({ allMovies, loading, error }) {
   const [minRatings, setMinRatings] = useState(7.1); // Minimum rating threshold (default: show movies > 7)
 
-  // Process movies for filtering and sorting
-  let topRatedMovies = [];
-  if (allMovies && Array.isArray(allMovies)) {
-    topRatedMovies = allMovies
+  // Process movies for filtering and sorting - use useMemo to force re-computation when dependencies change
+  const topRatedMovies = React.useMemo(() => {
+    if (!allMovies || !Array.isArray(allMovies)) {
+      return [];
+    }
+
+    return allMovies
       .map((movie) => {
         // Handle both backend and local data structures
         let avgRating, reviewCount;
@@ -44,7 +47,7 @@ export default function TopRatedPage({ allMovies, loading, error }) {
         return b.avgRating - a.avgRating;
       })
       .slice(0, 50); // Top 50
-  }
+  }, [allMovies, minRatings]); // Dependencies: re-compute when allMovies or minRatings change
 
   const bannerImg = topRatedMovies[0]?.poster || topRatedMovies[0]?.image || null;
 

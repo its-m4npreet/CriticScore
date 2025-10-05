@@ -4,12 +4,37 @@ import { Icon } from "../components/Icons";
 import ApiService from "../services/api";
 import { isUserAdmin } from "../adminDetails";
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ onMovieChange }) {
   const { user } = useUser();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingMovie, setEditingMovie] = useState(null);
+
+  // Debug user info and admin promotion helper
+  React.useEffect(() => {
+    if (user) {
+      const userEmail = user.emailAddresses?.[0]?.emailAddress;
+      console.log('🔍 Current user info:', {
+        email: userEmail,
+        role: user.publicMetadata?.role,
+        userId: user.id,
+        isAdmin: isUserAdmin(user)
+      });
+
+      // If not admin, provide instructions
+      if (!isUserAdmin(user)) {
+        console.log('❌ Admin access needed. Options:');
+        console.log('1. Add your email to ADMIN_EMAILS in adminDetails.js');
+        console.log('2. Or run this in console to make yourself admin:');
+        console.log(`fetch('http://localhost:3000/api/dev/make-admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: '${userEmail}' })
+        }).then(r => r.json()).then(console.log)`);
+      }
+    }
+  }, [user]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -21,6 +46,7 @@ export default function AdminDashboard() {
     genre: "",
     director: "",
     language: "English",
+    country: "USA",
     budget: "",
     boxOffice: "",
     awards: "",
@@ -52,23 +78,25 @@ export default function AdminDashboard() {
     }
   };
 
-  // Form validation
+  // Form validation - matches backend requirements
   const validateForm = () => {
     const errors = {};
     
+    // Required fields per backend model
     if (!formData.title.trim()) errors.title = "Title is required";
     if (!formData.description.trim()) errors.description = "Description is required";
     if (!formData.director.trim()) errors.director = "Director is required";
     if (!formData.year) errors.year = "Release year is required";
-    if (!formData.genre.trim()) errors.genre = "Genre is required";
     if (!formData.runtime || formData.runtime <= 0) errors.runtime = "Valid runtime is required";
+    if (!formData.language.trim()) errors.language = "Language is required";
+    if (!formData.country.trim()) errors.country = "Country is required";
     
-    // URL validation
+    // URL validation (optional fields)
     const urlPattern = /^https?:\/\/.+/;
-    if (formData.poster && !urlPattern.test(formData.poster)) {
+    if (formData.poster && formData.poster.trim() && !urlPattern.test(formData.poster)) {
       errors.poster = "Valid poster URL is required";
     }
-    if (formData.trailer && !urlPattern.test(formData.trailer)) {
+    if (formData.trailer && formData.trailer.trim() && !urlPattern.test(formData.trailer)) {
       errors.trailer = "Valid trailer URL is required";
     }
     
@@ -103,18 +131,51 @@ export default function AdminDashboard() {
     setIsSubmitting(true);
     
     try {
+      // Format data for backend API
+      const movieData = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        director: formData.director.trim(),
+        poster: formData.poster.trim() || undefined,
+        trailer: formData.trailer.trim() || undefined,
+        backdrop: formData.backdrop.trim() || undefined,
+        // Convert year to proper releaseDate for backend
+        releaseDate: formData.year ? new Date(`${formData.year}-01-01`) : new Date(),
+        // Convert runtime to duration (number) for backend
+        duration: parseInt(formData.runtime) || 120,
+        // Convert genre string to array for backend
+        genre: formData.genre ? formData.genre.split(',').map(g => g.trim()).filter(g => g) : [],
+        language: formData.language || 'English',
+        country: formData.country || 'USA',
+        budget: formData.budget ? parseInt(formData.budget) : undefined,
+        boxOffice: formData.boxOffice ? parseInt(formData.boxOffice) : undefined,
+        featured: formData.featured,
+        isActive: formData.isActive,
+        // Cast can be added later, for now empty array
+        cast: []
+      };
+
+      console.log('📤 Sending movie data to backend:', movieData);
+
       if (editingMovie) {
-        await ApiService.updateMovie(editingMovie._id, formData);
+        await ApiService.updateMovie(editingMovie._id, movieData);
+        console.log('✅ Movie updated successfully');
         alert("Movie updated successfully!");
       } else {
-        await ApiService.createMovie(formData);
+        const result = await ApiService.createMovie(movieData);
+        console.log('✅ Movie created successfully:', result);
         alert("Movie created successfully!");
       }
       
       resetForm();
       loadMovies();
+      
+      // Update global movies state in other pages
+      if (onMovieChange) {
+        onMovieChange();
+      }
     } catch (error) {
-      console.error("Error saving movie:", error);
+      console.error("❌ Error saving movie:", error);
       alert(`Error ${editingMovie ? 'updating' : 'creating'} movie: ${error.message}`);
     } finally {
       setIsSubmitting(false);
@@ -134,6 +195,7 @@ export default function AdminDashboard() {
       genre: Array.isArray(movie.genre) ? movie.genre.join(", ") : movie.genre || "",
       director: movie.director || "",
       language: movie.language || "English",
+      country: movie.country || "USA",
       budget: movie.budget || "",
       boxOffice: movie.boxOffice || "",
       awards: movie.awards || "",
@@ -149,6 +211,11 @@ export default function AdminDashboard() {
       try {
         await ApiService.deleteMovie(movieId);
         loadMovies();
+        
+        // Update global movies state in other pages
+        if (onMovieChange) {
+          onMovieChange();
+        }
       } catch (error) {
         console.error("Error deleting movie:", error);
         alert("Error deleting movie. Please try again.");
@@ -168,6 +235,7 @@ export default function AdminDashboard() {
       genre: "",
       director: "",
       language: "English",
+      country: "USA",
       budget: "",
       boxOffice: "",
       awards: "",
@@ -179,13 +247,60 @@ export default function AdminDashboard() {
     setShowCreateForm(false);
   };
 
+  // Function to make current user admin (development only)
+  const makeUserAdmin = async () => {
+    if (!user) return;
+    
+    try {
+      const userEmail = user.emailAddresses?.[0]?.emailAddress;
+      const response = await fetch('http://localhost:3000/api/dev/make-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail })
+      });
+      
+      const result = await response.json();
+      console.log('Admin promotion result:', result);
+      
+      if (response.ok) {
+        alert('✅ Admin access granted! Please refresh the page.');
+        window.location.reload();
+      } else {
+        alert('❌ Failed to grant admin access: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error promoting user:', error);
+      alert('❌ Error granting admin access');
+    }
+  };
+
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen theme-bg-primary">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto p-6">
           <Icon name="lock" size={64} className="mx-auto mb-4 text-red-400" />
-          <h1 className="text-2xl font-bold theme-text-primary mb-2">Access Denied</h1>
-          <p className="theme-text-secondary">You don't have permission to access the admin panel.</p>
+          <h1 className="text-2xl font-bold theme-text-primary mb-2">Admin Access Required</h1>
+          <p className="theme-text-secondary mb-6">You need admin permissions to access this panel.</p>
+          
+          {user && (
+            <div className="space-y-4">
+              <div className="text-sm theme-text-secondary bg-gray-800 p-3 rounded-lg">
+                <p><strong>Your Email:</strong> {user.emailAddresses?.[0]?.emailAddress}</p>
+                <p><strong>User ID:</strong> {user.id}</p>
+              </div>
+              
+              <button
+                onClick={makeUserAdmin}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              >
+                🔑 Grant Admin Access (Development)
+              </button>
+              
+              <p className="text-xs theme-text-secondary">
+                This button uses the development endpoint to grant admin access.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -194,7 +309,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen theme-bg-primary theme-text-primary p-4 lg:p-8 custom-scrollbar">
       <div className="max-w-7xl mx-auto">
-        <style jsx>{`
+        <style>{`
           .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
             height: 8px;

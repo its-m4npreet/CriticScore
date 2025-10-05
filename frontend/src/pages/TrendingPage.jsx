@@ -3,10 +3,13 @@ import MovieCard from "../components/MovieCard";
 import { Icon } from "../components/Icons";
 
 export default function TrendingPage({ allMovies, loading, error }) {
-  // Filter and process only trending movies
-  let trendingMovies = [];
-  if (allMovies && Array.isArray(allMovies)) {
-    trendingMovies = allMovies
+  // Filter and process only trending movies - use useMemo to force re-computation when allMovies changes
+  const trendingMovies = React.useMemo(() => {
+    if (!allMovies || !Array.isArray(allMovies)) {
+      return [];
+    }
+
+    return allMovies
       .filter((movie) => {
         // Check both local data (trending) and backend data (featured) fields
         return movie.trending === true || movie.featured === true;
@@ -25,7 +28,7 @@ export default function TrendingPage({ allMovies, loading, error }) {
         };
       })
       .sort((a, b) => b.avgRating - a.avgRating); // Sort by rating
-  }
+  }, [allMovies]); // Re-compute when allMovies changes
 
   const bannerImg = trendingMovies[0]?.poster || trendingMovies[0]?.image || null;
 
