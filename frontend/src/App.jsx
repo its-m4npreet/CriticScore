@@ -10,7 +10,7 @@ import {
 import { useAuth } from "@clerk/clerk-react";
 import MovieDetailPage from "./pages/movieDetails";
 import TestPage from "./pages/TestPage";
-import apiService from "./services/api";
+// import apiService from "./services/api"; // Temporarily disabled
 
 import Sidebar from "./components/Sidebar";
 import HomePage from "./pages/HomePage";
@@ -20,6 +20,7 @@ import CategoriesPage from "./pages/CategoriesPage";
 import WatchlistPage from "./pages/WatchlistPage";
 import SettingsPage from "./pages/SettingsPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import apiService from "./services/api";
 
 function GetToken() {
   const { getToken } = useAuth();
@@ -30,53 +31,21 @@ function GetToken() {
   return <button onClick={handleClick}>Log Token</button>;
 }
 
-// fetchMovies tries backend first, falls back to local data
+// fetchMovies from backend API
 async function fetchMovies() {
   try {
-    // Try to fetch from backend first
-    const backendData = await apiService.getMovies();
-    if (backendData && backendData.movies) {
-      // Keep backend data structure and add frontend-compatible fields
-      const convertedMovies = backendData.movies.map((movie) => ({
-        // Backend fields
-        _id: movie._id,
-        title: movie.title,
-        description: movie.description,
-        poster: movie.poster,
-        releaseDate: movie.releaseDate,
-        averageRating: movie.averageRating,
-        genre: movie.genre,
-        director: movie.director,
-        cast: movie.cast,
-        duration: movie.duration,
-        language: movie.language,
-        country: movie.country,
-        featured: movie.featured,
-        isActive: movie.isActive,
-        // Frontend-compatible fields
-        name: movie.title,
-        image: movie.poster || "https://via.placeholder.com/300x400",
-        desc: movie.description,
-        year: new Date(movie.releaseDate).getFullYear(),
-        rating: movie.averageRating || 0,
-        trending: movie.featured || false,
-        top: (movie.averageRating || 0) > 8,
-        category: movie.genre?.[0] || "Drama",
-        upcoming: false,
-        watchlist: false,
-        movieId: movie._id,
-      }));
-      return convertedMovies;
-    }
-  } catch (backendError) {
-    console.warn("Backend fetch failed, trying local data:", backendError);
+    console.log("🎬 Fetching movies from backend API...");
+    const response = await apiService.getMovies();
+    console.log("🔍 Raw backend response:", response);
+    
+    // Backend returns { movies: [...], pagination: {...} }
+    const movies = Array.isArray(response) ? response : (response?.movies || response?.data || []);
+    console.log("✅ Backend movies loaded:", movies.length, "movies");
+    return movies;
+  } catch (error) {
+    console.error("❌ Backend fetch failed:", error);
+    throw new Error("Failed to fetch movies from backend");
   }
-
-  // Fallback to local data
-  const res = await fetch("/src/data.json");
-  if (!res.ok) throw new Error("Failed to fetch local movies");
-  const localData = await res.json();
-  return localData;
 }
 
 function App() {
@@ -86,6 +55,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
   const { getToken } = useAuth();
@@ -134,6 +104,7 @@ function App() {
       setLoading(true);
       try {
         const data = await fetchMovies();
+
         setAllMovies(data);
       } catch (err) {
         setError(err.message);
@@ -147,17 +118,39 @@ function App() {
 
   return (
     <div className="min-h-screen theme-bg-primary flex theme-text-primary font-sans theme-transition">
-      <Sidebar />
-            <main className="flex-1 flex flex-col theme-bg-primary ml-60">
-                <header className="flex items-center justify-between px-8 py-4 theme-bg-primary border-b theme-border">
-          <div className="flex items-center gap-4 justify-between w-full">
-            <div className="relative search-container">
+      <Sidebar 
+        isMobileMenuOpen={isMobileMenuOpen} 
+        setIsMobileMenuOpen={setIsMobileMenuOpen} 
+      />
+      
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+      
+      <main className="flex-1 flex flex-col theme-bg-primary ml-0 lg:ml-60 transition-all duration-300">
+        <header className="flex items-center justify-between px-4 lg:px-8 py-4 theme-bg-primary border-b theme-border">
+          <div className="flex items-center gap-2 lg:gap-4 justify-between w-full">
+            {/* Mobile hamburger menu */}
+            <button
+              className="lg:hidden p-2 rounded-lg hover:theme-bg-secondary transition-colors"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            
+            <div className="relative search-container flex-1 max-w-md lg:max-w-none">
               <input
                 type="search"
-                placeholder="Search movies by name..."
+                placeholder="Search movies..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="settings-input px-4 py-2 rounded-lg w-[30rem] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] placeholder-[var(--text-secondary)]"
+                className="settings-input px-4 py-2 rounded-lg w-full lg:w-[30rem] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] placeholder-[var(--text-secondary)] text-sm lg:text-base"
                 disabled={currentPath === "/settings"}
               />
               
@@ -224,9 +217,9 @@ function App() {
               <HomePage allMovies={allMovies} loading={loading} error={error} />
             }
           />
-          <Route path="/trending" element={<TrendingPage />} />
-          <Route path="/top" element={<TopRatedPage />} />
-          <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/trending" element={<TrendingPage allMovies={allMovies} loading={loading} error={error} />} />
+          <Route path="/top" element={<TopRatedPage allMovies={allMovies} loading={loading} error={error} />} />
+          <Route path="/categories" element={<CategoriesPage allMovies={allMovies} loading={loading} error={error} />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminDashboard />} />

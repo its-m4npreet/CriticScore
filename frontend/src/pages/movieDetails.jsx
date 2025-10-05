@@ -38,6 +38,16 @@ export default function MovieDetailPage({ allMovies }) {
     setLoading(true);
     setError(null);
 
+    // Basic validation - only reject truly invalid IDs
+    if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
+      setError("Invalid movie ID");
+      setLoading(false);
+      return;
+    }
+
+    // Determine if this is a MongoDB ObjectId or a simple string ID
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
     try {
       // Try to get movie from backend first
       const movieData = await apiService.getMovieById(id);
@@ -45,63 +55,83 @@ export default function MovieDetailPage({ allMovies }) {
       if (movieData && (movieData._id || movieData.id)) {
         setMovie(movieData);
 
-        // Load user preferences from localStorage (temporary until backend integration)
+        // Load user preferences from localStorage
         const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
         const liked = JSON.parse(localStorage.getItem("likedMovies") || "[]");
 
         setIsWatchlisted(watchlist.includes(id));
         setIsLiked(liked.includes(id));
-      } else {
-        throw new Error("No valid movie data received from backend");
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error("Failed to load movie from backend:", err);
-
-      // Fallback to prop data if backend fails
-      const fallbackMovie = allMovies?.find((m) => m.movieId === id);
-      if (fallbackMovie) {
-        setMovie({
-          _id: id,
-          title: fallbackMovie.name,
-          description: fallbackMovie.desc,
-          poster: fallbackMovie.image,
-          releaseDate: new Date(fallbackMovie.year, 0, 1),
-          averageRating: fallbackMovie.rating || 0,
-          totalRatings: 0,
-          genre: [fallbackMovie.category],
-          // Add other required fields with defaults
-          director: "Unknown",
-          cast: [],
-          duration: 120,
-          language: "English",
-          country: "USA",
-          isActive: true,
-        });
-
-        // Load user preferences from localStorage for fallback
-        const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
-        const liked = JSON.parse(localStorage.getItem("likedMovies") || "[]");
-
-        setIsWatchlisted(watchlist.includes(id));
-        setIsLiked(liked.includes(id));
-      } else {
-        setError("Movie not found");
-      }
-    } finally {
-      setLoading(false);
+    } catch {
+      // Backend failed, continue to fallback
     }
+
+    // Fallback to local data - try exact match with all possible ID fields
+    let fallbackMovie = allMovies?.find((m) => 
+      m.movieId === id || m._id === id || m.id === id
+    );
+    
+    // If not found and it's an ObjectId, we can't match local data
+    if (!fallbackMovie && isObjectId) {
+      setError(`Movie with ObjectId "${id}" not found. Backend connection may be required.`);
+      setLoading(false);
+      return;
+    }
+
+    // If not found with simple ID, show available options
+    if (!fallbackMovie) {
+      const availableIds = allMovies?.map(m => 
+        m.movieId || m._id || m.id || 'no-id'
+      ).join(', ') || 'none';
+      setError(`Movie with ID "${id}" not found. Available IDs: ${availableIds}`);
+      setLoading(false);
+      return;
+    }
+
+    // Found in local data
+    setMovie({
+      _id: id,
+      title: fallbackMovie.name,
+      description: fallbackMovie.desc,
+      poster: fallbackMovie.image,
+      releaseDate: new Date(fallbackMovie.year, 0, 1),
+      averageRating: fallbackMovie.rating || 0,
+      totalRatings: 0,
+      genre: [fallbackMovie.category],
+      // Add other required fields with defaults
+      director: "Unknown",
+      cast: [],
+      duration: 120,
+      language: "English",
+      country: "USA",
+      isActive: true,
+    });
+
+    // Load user preferences from localStorage for fallback
+    const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
+    const liked = JSON.parse(localStorage.getItem("likedMovies") || "[]");
+
+    setIsWatchlisted(watchlist.includes(id));
+    setIsLiked(liked.includes(id));
+    setLoading(false);
   }, [id, allMovies]);
 
-  // Load movie data
+  // Load movie data (wait for allMovies to be available)
   useEffect(() => {
-    loadMovieData();
-  }, [loadMovieData]);
+    // Only load if we have allMovies or if it's null (meaning it failed to load)
+    if (allMovies !== undefined) {
+      loadMovieData();
+    }
+  }, [loadMovieData, allMovies]);
 
-  // Check watchlist status when user signs in
+  // Check watchlist status when user signs in (with error handling)
   useEffect(() => {
     const checkWatchlistStatus = async () => {
       if (isSignedIn && movie) {
         const movieId = movie?._id || movie?.id || movie?.movieId || id;
+
         
         if (!movieId) {
           console.error('No valid movie ID found for watchlist check');
@@ -110,12 +140,9 @@ export default function MovieDetailPage({ allMovies }) {
         
         try {
           const watchlistStatus = await apiService.checkWatchlistStatus(movieId);
-          console.log('Watchlist status response:', watchlistStatus);
           setIsWatchlisted(watchlistStatus.isInWatchlist);
-          console.log('Watchlist status checked:', watchlistStatus.isInWatchlist);
-        } catch (error) {
-          console.error('Error checking watchlist status:', error);
-          // Fallback to localStorage
+        } catch {
+          // Silently fallback to localStorage without logging errors
           const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
           setIsWatchlisted(watchlist.includes(movieId));
         }
@@ -141,12 +168,7 @@ export default function MovieDetailPage({ allMovies }) {
     // Get the correct movie ID - try different possible properties
     const movieId = movie?._id || movie?.id || movie?.movieId || id;
     
-    console.log('Debug - Movie object:', movie);
-    console.log('Debug - Movie ID used:', movieId);
-    console.log('Debug - URL ID:', id);
-    
     if (!movieId) {
-      console.error('No valid movie ID found');
       showNotification("Error: Movie ID not found");
       return;
     }
@@ -268,9 +290,31 @@ export default function MovieDetailPage({ allMovies }) {
 
   if (error || !movie) {
     return (
-      <section className="px-8 py-6 theme-bg-primary">
-        <div className="text-center text-red-400 text-xl">
-          {error || "Movie not found"}
+      <section className="px-8 py-6 theme-bg-primary min-h-screen flex items-center justify-center">
+        <div className="text-center p-8 theme-bg-secondary rounded-xl shadow-lg max-w-md mx-auto">
+          <div className="mb-4">
+            <svg className="w-16 h-16 mx-auto text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold theme-text-primary mb-2">Movie Not Found</h2>
+          <p className="theme-text-secondary mb-6">
+            {error || `Sorry, we couldn't find the movie with ID: ${id}`}
+          </p>
+          <div className="space-y-3">
+            <Link 
+              to="/" 
+              className="block w-full theme-bg-accent theme-text-accent-contrast px-6 py-3 rounded-lg hover:opacity-90 transition-opacity font-semibold"
+            >
+              Back to Home
+            </Link>
+            <button 
+              onClick={() => window.history.back()} 
+              className="block w-full theme-border theme-text-primary px-6 py-3 rounded-lg border hover:theme-bg-secondary transition-colors"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
       </section>
     );

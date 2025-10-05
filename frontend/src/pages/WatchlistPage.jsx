@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MovieCard from "../components/MovieCard";
 import ApiService from "../services/api";
-import { useUser } from "@clerk/clerk-react";
+import { SignInButton, useUser } from "@clerk/clerk-react";
 
 export default function WatchlistPage() {
   const [watchlist, setWatchlist] = useState([]);
@@ -137,44 +137,43 @@ export default function WatchlistPage() {
 
   if (!isSignedIn) {
     return (
-      <section className="px-8 py-6">
-        <div className="text-center py-20">
-          <div className="text-8xl mb-6">🔐</div>
-          <h2 className="text-3xl font-bold theme-text-primary mb-4">
+      <section className="px-4 lg:px-8 py-6">
+        <div className="text-center py-12 lg:py-20">
+          <div className="text-6xl lg:text-8xl mb-4 lg:mb-6">🔐</div>
+          <h2 className="text-2xl lg:text-3xl font-bold theme-text-primary mb-3 lg:mb-4">
             Sign In Required
           </h2>
-          <p className="theme-text-secondary text-lg mb-8">
+          <p className="theme-text-secondary text-base lg:text-lg mb-6 lg:mb-8 px-4">
             You need to sign in to view and manage your watchlist
           </p>
-          <button className="bg-[#f5c518] text-black px-8 py-3 rounded-lg font-semibold hover:bg-yellow-400 transition-colors">
-            Sign In
-          </button>
+                  <SignInButton className="bg-[var(--accent-color)] text-[var(--bg-primary)]  px-6 lg:px-8 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-colors touch-target cursor-pointer" />
+
         </div>
       </section>
     );
   }
 
   return (
-    <section className="px-8 py-6 theme-bg-primary">
-      <div className="rounded-2xl overflow-hidden shadow-2xl border-2 theme-border-accent relative h-56 theme-bg-secondary flex items-center justify-center mb-8">
-        <div className="relative z-10 text-center">
-          <h2 className="text-4xl font-extrabold mb-2 tracking-wide theme-accent drop-shadow-lg">
+    <section className="px-4 lg:px-8 py-4 lg:py-6 theme-bg-primary">
+      <div className="rounded-xl lg:rounded-2xl overflow-hidden shadow-xl lg:shadow-2xl border-2 theme-border-accent relative h-40 sm:h-48 lg:h-56 theme-bg-secondary flex items-center justify-center mb-6 lg:mb-8">
+        <div className="relative z-10 text-center px-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold mb-2 tracking-wide theme-accent drop-shadow-lg">
             📚 My Watchlist
           </h2>
-          <p className="theme-text-secondary text-lg drop-shadow">
+          <p className="theme-text-secondary text-sm sm:text-base lg:text-lg drop-shadow">
             Movies you want to watch later
           </p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold theme-text-primary tracking-wide">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 lg:mb-6">
+        <h3 className="text-lg lg:text-2xl font-bold theme-text-primary tracking-wide">
           Your Watchlist ({watchlist.length} movies)
         </h3>
         {watchlist.length > 0 && (
           <button
             onClick={clearWatchlistFn}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors text-sm lg:text-base touch-target"
           >
             Clear All
           </button>
@@ -182,47 +181,47 @@ export default function WatchlistPage() {
       </div>
 
       {/* Watchlist Content Area */}
-      <div className="min-h-[400px] relative">
+      <div className="min-h-[300px] lg:min-h-[400px] relative">
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-96 theme-accent">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 theme-border-accent mb-4"></div>
-            <span className="text-xl font-bold theme-text-primary">Loading your watchlist...</span>
-            <span className="text-sm theme-text-secondary mt-2">Please wait while we fetch your movies</span>
+          <div className="flex flex-col items-center justify-center h-64 lg:h-96 theme-accent">
+            <div className="animate-spin rounded-full h-12 w-12 lg:h-16 lg:w-16 border-b-4 theme-border-accent mb-3 lg:mb-4"></div>
+            <span className="text-lg lg:text-xl font-bold theme-text-primary">Loading your watchlist...</span>
+            <span className="text-xs lg:text-sm theme-text-secondary mt-2">Please wait while we fetch your movies</span>
           </div>
         ) : error ? (
-          <div className="flex items-center justify-center w-full h-32 text-red-400 text-xl font-bold">
+          <div className="flex items-center justify-center w-full h-32 text-red-400 text-lg lg:text-xl font-bold px-4">
             {error}
           </div>
         ) : watchlist.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-8xl mb-6">📝</div>
-            <h3 className="text-3xl font-semibold mb-4 theme-text-primary">
+          <div className="text-center py-12 lg:py-20">
+            <div className="text-6xl lg:text-8xl mb-4 lg:mb-6">📝</div>
+            <h3 className="text-2xl lg:text-3xl font-semibold mb-3 lg:mb-4 theme-text-primary">
               Your Watchlist is Empty
             </h3>
-            <p className="theme-text-secondary text-lg mb-8">
+            <p className="theme-text-secondary text-base lg:text-lg mb-6 lg:mb-8 px-4">
               Start adding movies to your watchlist by clicking the bookmark icon
               on movie cards
             </p>
-            <div className="theme-bg-secondary theme-border rounded-lg p-6 max-w-md mx-auto">
-              <h4 className="theme-accent font-semibold mb-2">💡 Pro Tip:</h4>
-              <p className="theme-text-primary text-sm">
+            <div className="theme-bg-secondary theme-border rounded-lg p-4 lg:p-6 max-w-md mx-auto">
+              <h4 className="theme-accent font-semibold mb-2 text-sm lg:text-base">💡 Pro Tip:</h4>
+              <p className="theme-text-primary text-xs lg:text-sm">
                 Browse movies and click the 📚 icon to add them to your watchlist
                 for later viewing
               </p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {watchlist.map((movie, index) => (
               <div key={movie._id || movie.movieId || movie.id || `movie-${index}`} className="relative">
                 <MovieCard movie={movie} />
                 <button
                   onClick={() => removeFromWatchlist(movie._id || movie.movieId || movie.id)}
-                  className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-colors z-10"
+                  className="absolute top-1 lg:top-2 right-1 lg:right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 lg:p-2 transition-colors z-10 touch-target flex justify-center items-center"
                   title="Remove from watchlist"
                 >
                   <svg
-                    className="w-4 h-4"
+                    className="w-3 h-3 lg:w-4 lg:h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

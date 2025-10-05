@@ -192,7 +192,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen theme-bg-primary theme-text-primary p-8 custom-scrollbar">
+    <div className="min-h-screen theme-bg-primary theme-text-primary p-4 lg:p-8 custom-scrollbar">
       <div className="max-w-7xl mx-auto">
         <style jsx>{`
           .custom-scrollbar::-webkit-scrollbar {
@@ -246,56 +246,56 @@ export default function AdminDashboard() {
           }
         `}</style>
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <Icon name="settings" size={32} className="theme-accent" />
-              Admin Dashboard
+            <h1 className="text-2xl lg:text-3xl font-bold flex items-center gap-2 lg:gap-3">
+              <Icon name="settings" size={28} className="theme-accent lg:w-8 lg:h-8" />
+              <span className="truncate">Admin Dashboard</span>
             </h1>
-            <p className="theme-text-secondary mt-2">Manage movies and content</p>
+            <p className="theme-text-secondary mt-1 lg:mt-2 text-sm lg:text-base">Manage movies and content</p>
           </div>
           
           <button
             onClick={() => setShowCreateForm(true)}
-            className="flex items-center gap-2 theme-button-primary px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-all"
+            className="flex items-center justify-center gap-2 theme-button-primary px-4 lg:px-6 py-2 lg:py-3 rounded-lg font-semibold hover:opacity-90 transition-all text-sm lg:text-base w-full lg:w-auto"
           >
-            <Icon name="plus" size={20} />
-            Add New Movie
+            <Icon name="plus" size={18} />
+            <span className="lg:inline">Add New Movie</span>
           </button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="theme-card p-6 rounded-xl">
-            <div className="flex items-center gap-4">
-              <Icon name="film" size={40} className="theme-accent" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+          <div className="theme-card p-4 lg:p-6 rounded-xl">
+            <div className="flex items-center gap-3 lg:gap-4">
+              <Icon name="film" size={32} className="theme-accent lg:w-10 lg:h-10" />
               <div>
-                <h3 className="text-2xl font-bold">{movies.length}</h3>
-                <p className="theme-text-secondary">Total Movies</p>
+                <h3 className="text-xl lg:text-2xl font-bold">{movies.length}</h3>
+                <p className="theme-text-secondary text-sm lg:text-base">Total Movies</p>
               </div>
             </div>
           </div>
           
-          <div className="theme-card p-6 rounded-xl">
-            <div className="flex items-center gap-4">
-              <Icon name="star" size={40} className="text-yellow-400" />
+          <div className="theme-card p-4 lg:p-6 rounded-xl">
+            <div className="flex items-center gap-3 lg:gap-4">
+              <Icon name="star" size={32} className="text-yellow-400 lg:w-10 lg:h-10" />
               <div>
-                <h3 className="text-2xl font-bold">
+                <h3 className="text-xl lg:text-2xl font-bold">
                   {movies.filter(m => m.featured).length}
                 </h3>
-                <p className="theme-text-secondary">Featured Movies</p>
+                <p className="theme-text-secondary text-sm lg:text-base">Featured Movies</p>
               </div>
             </div>
           </div>
           
-          <div className="theme-card p-6 rounded-xl">
-            <div className="flex items-center gap-4">
-              <Icon name="trending" size={40} className="text-green-400" />
+          <div className="theme-card p-4 lg:p-6 rounded-xl sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-3 lg:gap-4">
+              <Icon name="trending" size={32} className="text-green-400 lg:w-10 lg:h-10" />
               <div>
-                <h3 className="text-2xl font-bold">
+                <h3 className="text-xl lg:text-2xl font-bold">
                   {movies.filter(m => m.averageRating > 8).length}
                 </h3>
-                <p className="theme-text-secondary">High Rated (8+)</p>
+                <p className="theme-text-secondary text-sm lg:text-base">High Rated (8+)</p>
               </div>
             </div>
           </div>
@@ -303,9 +303,9 @@ export default function AdminDashboard() {
 
         {/* Movies Table */}
         <div className="theme-card rounded-xl overflow-hidden">
-          <div className="p-6 border-b theme-border">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Icon name="list" size={24} />
+          <div className="p-4 lg:p-6 border-b theme-border">
+            <h2 className="text-lg lg:text-xl font-semibold flex items-center gap-2">
+              <Icon name="list" size={20} className="lg:w-6 lg:h-6" />
               All Movies
             </h2>
           </div>
@@ -317,65 +317,72 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="overflow-x-auto table-scrollbar">
-              <table className="w-full">
+              <table className="w-full min-w-[600px]">
                 <thead className="theme-bg-secondary">
                   <tr>
-                    <th className="text-left p-4 font-semibold">Movie</th>
-                    <th className="text-left p-4 font-semibold">Director</th>
-                    <th className="text-left p-4 font-semibold">Year</th>
-                    <th className="text-left p-4 font-semibold">Rating</th>
-                    <th className="text-left p-4 font-semibold">Status</th>
-                    <th className="text-left p-4 font-semibold">Actions</th>
+                    <th className="text-left p-2 lg:p-4 font-semibold text-sm lg:text-base">Movie</th>
+                    <th className="text-left p-2 lg:p-4 font-semibold text-sm lg:text-base hidden sm:table-cell">Director</th>
+                    <th className="text-left p-2 lg:p-4 font-semibold text-sm lg:text-base">Year</th>
+                    <th className="text-left p-2 lg:p-4 font-semibold text-sm lg:text-base hidden md:table-cell">Rating</th>
+                    <th className="text-left p-2 lg:p-4 font-semibold text-sm lg:text-base hidden lg:table-cell">Status</th>
+                    <th className="text-left p-2 lg:p-4 font-semibold text-sm lg:text-base">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {movies.map((movie) => (
                     <tr key={movie._id} className="border-b theme-border hover:theme-bg-hover">
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
+                      <td className="p-2 lg:p-4">
+                        <div className="flex items-center gap-2 lg:gap-3">
                           <img
                             src={movie.poster}
                             alt={movie.title}
-                            className="w-12 h-16 object-cover rounded"
+                            className="w-8 h-10 lg:w-12 lg:h-16 object-cover rounded"
                           />
-                          <div>
-                            <h4 className="font-semibold">{movie.title}</h4>
-                            <p className="text-sm theme-text-secondary">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-semibold text-sm lg:text-base truncate">{movie.title}</h4>
+                            <p className="text-xs lg:text-sm theme-text-secondary truncate sm:hidden">
+                              {movie.director}
+                            </p>
+                            <p className="text-xs theme-text-secondary truncate hidden lg:block">
                               {Array.isArray(movie.genre) ? movie.genre.join(", ") : movie.genre}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4">{movie.director}</td>
-                      <td className="p-4">
+                      <td className="p-2 lg:p-4 hidden sm:table-cell">
+                        <div className="text-sm lg:text-base truncate">{movie.director}</div>
+                      </td>
+                      <td className="p-2 lg:p-4 text-sm lg:text-base">
                         {movie.year || new Date(movie.releaseDate).getFullYear()}
                       </td>
-                      <td className="p-4">
+                      <td className="p-2 lg:p-4 hidden md:table-cell">
                         <div className="flex items-center gap-1">
-                          <Icon name="star" size={16} className="text-yellow-400" />
-                          {movie.averageRating?.toFixed(1) || "N/A"}
+                          <Icon name="star" size={14} className="text-yellow-400 lg:w-4 lg:h-4" />
+                          <span className="text-sm lg:text-base">{movie.averageRating?.toFixed(1) || "N/A"}</span>
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-2 lg:p-4 hidden lg:table-cell">
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           movie.featured ? "bg-yellow-500 text-black" : "theme-bg-secondary"
                         }`}>
                           {movie.featured ? "Featured" : "Regular"}
                         </span>
                       </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
+                      <td className="p-2 lg:p-4">
+                        <div className="flex items-center gap-1 lg:gap-2">
                           <button
                             onClick={() => handleEdit(movie)}
-                            className="p-2 theme-bg-secondary hover:theme-bg-hover rounded transition-colors"
+                            className="p-1.5 lg:p-2 theme-bg-secondary hover:theme-bg-hover rounded transition-colors"
+                            title="Edit"
                           >
-                            <Icon name="edit" size={16} />
+                            <Icon name="edit" size={14} className="lg:w-4 lg:h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(movie._id)}
-                            className="p-2 bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
+                            className="p-1.5 lg:p-2 bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
+                            title="Delete"
                           >
-                            <Icon name="trash" size={16} />
+                            <Icon name="trash" size={14} className="lg:w-4 lg:h-4" />
                           </button>
                         </div>
                       </td>
@@ -389,17 +396,17 @@ export default function AdminDashboard() {
 
         {/* Create/Edit Movie Modal */}
         {showCreateForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="theme-bg-secondary rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto modal-scrollbar shadow-2xl">
-              <div className="p-6 border-b theme-border">
-                <h3 className="text-xl font-semibold flex items-center gap-2">
-                  <Icon name={editingMovie ? "edit" : "plus"} size={24} />
-                  {editingMovie ? "Edit Movie" : "Add New Movie"}
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 lg:p-4">
+            <div className="theme-bg-secondary rounded-xl max-w-4xl w-full max-h-[95vh] lg:max-h-[90vh] overflow-y-auto modal-scrollbar shadow-2xl">
+              <div className="p-4 lg:p-6 border-b theme-border">
+                <h3 className="text-lg lg:text-xl font-semibold flex items-center gap-2">
+                  <Icon name={editingMovie ? "edit" : "plus"} size={20} className="lg:w-6 lg:h-6" />
+                  <span className="truncate">{editingMovie ? "Edit Movie" : "Add New Movie"}</span>
                 </h3>
               </div>
               
-              <form onSubmit={handleSubmit} className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <form onSubmit={handleSubmit} className="p-4 lg:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                   {/* Left Column - Basic Information */}
                   <div className="space-y-6">
                     <div className="border-b theme-border pb-4">

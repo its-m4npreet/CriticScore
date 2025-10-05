@@ -1,66 +1,61 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import MovieCard from "../components/MovieCard";
-import ApiService from "../services/api";
 import { GenreIcon } from "../components/Icons";
 
-export default function CategoriesPage() {
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function CategoriesPage({ allMovies, loading, error }) {
   const [selectedGenre, setSelectedGenre] = useState("all");
-  const [genres, setGenres] = useState([]);
 
-  useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        setLoading(true);
-        console.log("[Categories] Fetching movies for categories page...");
-        const response = await ApiService.getMovies();
-        console.log("📡 API Response:", response);
-        
-        // Handle different response structures
-        let allMovies = [];
-        if (Array.isArray(response)) {
-          allMovies = response;
-        } else if (response && response.movies && Array.isArray(response.movies)) {
-          allMovies = response.movies;
-        } else if (response && response.data && Array.isArray(response.data)) {
-          allMovies = response.data;
+  // Process movies and extract genres
+  const { movies, genres } = useMemo(() => {
+    if (!allMovies || !Array.isArray(allMovies)) {
+      console.log("[Categories] allMovies is not an array:", typeof allMovies, allMovies);
+      return { movies: [], genres: [] };
+    }
+    
+    console.log("[Categories] Processing movies:", allMovies.length, "movies");
+    
+    // Process the movies (backend format)
+    const processedMovies = allMovies.map((movie) => ({
+      ...movie,
+      // Ensure consistent field names for both frontend and backend
+      title: movie.title || movie.name,
+      name: movie.name || movie.title,
+      // Backend uses genre array, local data uses category string
+      genre: movie.genre || (movie.category ? [movie.category] : []),
+      category: movie.category || (Array.isArray(movie.genre) ? movie.genre.join(", ") : movie.genre),
+      // Backend uses poster, local data uses image
+      image: movie.poster || movie.image,
+      poster: movie.poster || movie.image,
+      // Backend uses description, local data uses desc
+      desc: movie.description || movie.desc,
+      description: movie.description || movie.desc,
+    }));
+    
+    // Extract unique genres (backend returns array, local data is string)
+    const allGenres = new Set();
+    processedMovies.forEach((movie) => {
+      console.log("[Categories] Movie genre:", movie.title || movie.name, "=>", movie.genre, movie.category);
+      
+      // Backend uses genre array, local data uses category string
+      const genreField = movie.genre || movie.category;
+      if (genreField) {
+        // Handle both array (backend) and string (local) formats
+        if (Array.isArray(genreField)) {
+          genreField.forEach((g) => allGenres.add(g));
+        } else if (typeof genreField === "string") {
+          genreField.split(",").forEach((g) => allGenres.add(g.trim()));
         }
-        
-        console.log("[Categories] Processed movies:", allMovies.length, allMovies);
-        setMovies(allMovies);
-
-        // Extract unique genres
-        const allGenres = new Set();
-        allMovies.forEach((movie) => {
-          console.log("[Categories] Movie genre:", movie.title, "=>", movie.genre, movie.category);
-          
-          // Check both 'genre' and 'category' fields
-          const genreField = movie.genre || movie.category;
-          if (genreField) {
-            // Handle both string and array genres
-            if (Array.isArray(genreField)) {
-              genreField.forEach((g) => allGenres.add(g));
-            } else if (typeof genreField === "string") {
-              genreField.split(",").forEach((g) => allGenres.add(g.trim()));
-            }
-          }
-        });
-        
-        const sortedGenres = ["all", ...Array.from(allGenres).sort()];
-        console.log("🏷️ Available genres:", sortedGenres);
-        setGenres(sortedGenres);
-      } catch (err) {
-        setError("Failed to load movies");
-        console.error("[Categories] Error fetching movies:", err);
-      } finally {
-        setLoading(false);
       }
+    });
+    
+    const sortedGenres = ["all", ...Array.from(allGenres).sort()];
+    console.log("🏷️ Available genres:", sortedGenres);
+    
+    return {
+      movies: processedMovies,
+      genres: sortedGenres
     };
-
-    fetchMovies();
-  }, []);
+  }, [allMovies]);
 
   const filteredMovies = useMemo(() => {
     console.log("[Categories] Filtering movies for genre:", selectedGenre);
@@ -74,9 +69,10 @@ export default function CategoriesPage() {
     const filtered = movies.filter((movie) => {
       // Check both 'genre' and 'category' fields
       const genreField = movie.genre || movie.category;
+      const movieTitle = movie.title || movie.name;
       
       if (!genreField) {
-        console.log("⚠️ Movie has no genre/category:", movie.title);
+        console.log("⚠️ Movie has no genre/category:", movieTitle);
         return false;
       }
       
@@ -92,7 +88,7 @@ export default function CategoriesPage() {
       }
       
       if (hasGenre) {
-        console.log("[Categories] Movie matches genre:", movie.title, genreField);
+        console.log("[Categories] Movie matches genre:", movieTitle, genreField);
       }
       
       return hasGenre;
@@ -105,36 +101,36 @@ export default function CategoriesPage() {
   // Genre icons are now handled by the GenreIcon component
 
   return (
-    <section className="px-8 py-6 theme-bg-primary theme-text-primary">
-      <div className="rounded-2xl overflow-hidden shadow-2xl border-2 theme-border-accent relative h-56 theme-bg-secondary flex items-center justify-center mb-8">
-        <div className="relative z-10 text-center">
-          <h2 className="text-4xl font-extrabold mb-2 tracking-wide theme-accent drop-shadow-lg">
+    <section className="px-4 lg:px-8 py-4 lg:py-6 theme-bg-primary theme-text-primary">
+      <div className="rounded-xl lg:rounded-2xl overflow-hidden shadow-xl lg:shadow-2xl border-2 theme-border-accent relative h-40 sm:h-48 lg:h-56 theme-bg-secondary flex items-center justify-center mb-6 lg:mb-8">
+        <div className="relative z-10 text-center px-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold mb-2 tracking-wide theme-accent drop-shadow-lg">
             🎬 Browse by Categories
           </h2>
-          <p className="theme-text-secondary text-lg drop-shadow">
+          <p className="theme-text-secondary text-sm sm:text-base lg:text-lg drop-shadow">
             Discover movies by your favorite genres
           </p>
         </div>
       </div>
 
       {/* Genre Filter */}
-      <div className="mb-8">
-        <h3 className="text-2xl font-bold theme-accent mb-4">Select Genre</h3>
-        <div className="flex flex-wrap gap-3">
+      <div className="mb-6 lg:mb-8">
+        <h3 className="text-xl lg:text-2xl font-bold theme-accent mb-3 lg:mb-4">Select Genre</h3>
+        <div className="flex flex-wrap gap-2 lg:gap-3">
           {genres.map((genre) => (
             <button
               key={genre}
               onClick={() => setSelectedGenre(genre)}
-              className={`px-4 py-2 rounded-full font-semibold transition-all duration-200 ${
+              className={`px-3 lg:px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm lg:text-base touch-target ${
                 selectedGenre === genre
                   ? "theme-bg-accent theme-text-on-accent shadow-lg transform scale-105"
                   : "theme-bg-secondary theme-text-secondary hover:theme-bg-hover theme-border"
               }`}
             >
               {genre === "all" ? (
-                <span className="flex items-center"><GenreIcon genre="all" size={18} className="mr-2 " />All Movies</span>
+                <span className="flex items-center"><GenreIcon genre="all" size={16} className="lg:w-4 lg:h-4 mr-1 lg:mr-2" />All Movies</span>
               ) : (
-                <span className="flex items-center"><GenreIcon genre={genre} size={18} className="mr-2" />{genre}</span>
+                <span className="flex items-center"><GenreIcon genre={genre} size={16} className="lg:w-4 lg:h-4 mr-1 lg:mr-2" />{genre}</span>
               )}
             </button>
           ))}
@@ -142,8 +138,8 @@ export default function CategoriesPage() {
       </div>
 
       {/* Results */}
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold theme-text-primary tracking-wide">
+      <div className="flex items-center justify-between mb-4 lg:mb-6">
+        <h3 className="text-lg lg:text-2xl font-bold theme-text-primary tracking-wide">
           {selectedGenre === "all"
             ? `All Movies (${filteredMovies.length})`
             : `${selectedGenre} Movies (${filteredMovies.length})`}
@@ -163,18 +159,18 @@ export default function CategoriesPage() {
           <div className="text-6xl mb-4">
             <GenreIcon genre={selectedGenre === "all" ? "Action" : selectedGenre} size={72} className="text-gray-400" />
           </div>
-          <h3 className="text-2xl font-semibold mb-2 text-gray-300">
+          <h3 className="text-xl lg:text-2xl font-semibold mb-2 text-gray-300">
             No {selectedGenre === "all" ? "Movies" : selectedGenre + " Movies"}{" "}
             Found
           </h3>
-          <p className="text-gray-400">
+          <p className="text-gray-400 text-sm lg:text-base px-4">
             {selectedGenre === "all"
               ? "No movies available yet"
               : `No ${selectedGenre.toLowerCase()} movies available yet`}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {filteredMovies.map((movie) => (
             <MovieCard key={movie._id} movie={movie} />
           ))}
