@@ -3,7 +3,7 @@ import { useUser } from "@clerk/clerk-react";
 import { Icon } from "../components/Icons";
 import ApiService from "../services/api";
 
-import { isUserAdmin } from "../adminDetails";
+import { isUserAdmin } from "../adminDetails.js";
 
 export default function AdminDashboard({ onMovieChange }) {
   const { user } = useUser();
