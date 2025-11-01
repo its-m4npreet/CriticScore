@@ -170,14 +170,24 @@
   .mobile-text-sm { font-size: 0.875rem; }
   .mobile-spacing-sm { padding: 0.5rem; }
   .mobile-gap-sm { gap: 0.5rem; }
+ 
 }
+
 
 @media (min-width: 1024px) {
   .desktop-text-base { font-size: 1rem; }
   .desktop-text-lg { font-size: 1.125rem; }
   .desktop-spacing-lg { padding: 1.5rem; }
   .desktop-gap-lg { gap: 1.5rem; }
+  .cl-internal-1x28sfr { 
+    background: none !important;
+    /* Add your styles here */ }
 }
+@media (max-width: 48em) {
+    .cl-internal-1x28sfr {
+        display: none;
+    }
+  }
 
 /* Mobile-first utility classes */
 .touch-friendly {
