@@ -12,7 +12,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import React from "react";
-import { isUserAdmin } from "../adminDetails";
+import { isUserAdmin } from "../adminDetails.js";
 
 export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
   const { user } = useUser();
