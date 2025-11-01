@@ -14,7 +14,6 @@ A movie rating web app built with React, Vite, and Tailwind CSS.
    ```
 3. Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-
 ## Setup Environment Variables
 
 1. Create a `.env` file in the root directory.
