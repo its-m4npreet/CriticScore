@@ -1,29 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useClerk, SignInButton } from "@clerk/clerk-react";
+import ApiService from "../services/api";
+import { useTheme } from "../hooks/useTheme";
+import { Icon } from "../components/Icons";
 
 export default function SettingsPage() {
   const { user, isSignedIn } = useUser();
+  const { openUserProfile } = useClerk();
+  const { theme, setTheme } = useTheme();
+  
   const [settings, setSettings] = useState({
-    theme: "dark",
     emailNotifications: true,
     autoplay: false,
     showSpoilers: false,
-    defaultRatingSystem: "numbers", // 'numbers' or 'stars'
+    defaultRatingSystem: "numbers",
     language: "en",
     showAdultContent: false,
+    movieListView: "grid",
+    itemsPerPage: 20,
+    enableKeyboardShortcuts: true,
+    showRatingCounts: true,
+    autoSaveReviews: true,
   });
+
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    // Load settings from localStorage
     const savedSettings = localStorage.getItem("criticscore_settings");
     if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+      try {
+        const parsedSettings = JSON.parse(savedSettings);
+        setSettings(parsedSettings);
+      } catch (error) {
+        console.error("Error parsing saved settings:", error);
+      }
     }
-  }, []);
+  }, [isSignedIn, user]);
 
   const handleSettingChange = (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
   };
 
   const saveSettings = () => {
@@ -32,93 +51,79 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const resetSettings = () => {
-    const defaultSettings = {
-      theme: "dark",
-      emailNotifications: true,
-      autoplay: false,
-      showSpoilers: false,
-      defaultRatingSystem: "numbers",
-      language: "en",
-      showAdultContent: false,
-    };
-    setSettings(defaultSettings);
-    localStorage.setItem(
-      "criticscore_settings",
-      JSON.stringify(defaultSettings)
-    );
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
-
   if (!isSignedIn) {
     return (
-      <section className="px-8 py-6">
-        <div className="text-center py-20">
-          <div className="text-8xl mb-6">🔐</div>
-          <h2 className="text-3xl font-bold text-white mb-4">
+      <section className="px-4 lg:px-8 py-6 min-h-screen theme-bg-primary">
+        <div className="text-center py-12 lg:py-20">
+          <div className="text-6xl lg:text-8xl mb-4 lg:mb-6">🔐</div>
+          <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3 lg:mb-4">
             Sign In Required
           </h2>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-400 text-base lg:text-lg mb-3">
             You need to sign in to access your settings
           </p>
+          <SignInButton className="bg-[var(--accent-color)] text-[var(--bg-primary)]  px-6 lg:px-8 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-colors touch-target cursor-pointer" />
         </div>
       </section>
     );
   }
 
   return (
-    <section className="px-8 py-6">
-      <div className="rounded-2xl overflow-hidden shadow-2xl border-2 border-[#f5c518] relative h-56 bg-gradient-to-r from-[#232323] to-[#141414] flex items-center justify-center mb-8">
-        <div className="relative z-10 text-center">
-          <h2 className="text-4xl font-extrabold mb-2 tracking-wide text-[#f5c518] drop-shadow-lg">
-            ⚙️ Settings
-          </h2>
-          <p className="text-gray-200 text-lg drop-shadow">
-            Customize your CriticScore experience
-          </p>
-        </div>
-      </div>
-
+    <section className="px-4 lg:px-8 py-4 lg:py-6 theme-bg-primary theme-text-primary min-h-screen">
       <div className="max-w-4xl mx-auto">
-        {/* User Profile Section */}
-        <div className="bg-[#1a1a1a] rounded-lg p-6 mb-8 border border-gray-700">
-          <h3 className="text-2xl font-bold text-[#f5c518] mb-4 flex items-center gap-2">
-            👤 Profile Information
+        <div className="mb-6 lg:mb-8">
+          <h1 className="text-2xl lg:text-3xl font-bold theme-accent mb-2">Settings</h1>
+          <p className="theme-text-secondary text-sm lg:text-base">Manage your account preferences and privacy settings</p>
+        </div>
+
+        <div className="settings-card rounded-lg p-4 lg:p-6 mb-4 lg:mb-8">
+          <h3 className="text-lg lg:text-2xl font-bold theme-accent mb-3 lg:mb-4 flex items-center gap-2">
+            <Icon name="profile" size={16} className="lg:w-5 lg:h-5" /> Profile Information
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-300 mb-2">Name</label>
-              <div className="bg-[#232323] border border-gray-600 rounded-lg p-3 text-gray-400">
-                {user?.fullName || user?.firstName || "Anonymous User"}
+              <label className="block theme-text-secondary mb-2 text-sm lg:text-base">Name</label>
+              <div className="settings-input rounded-lg p-3 lg:p-4">
+                <span className="theme-text-primary text-sm lg:text-base">
+                  {user?.fullName || user?.firstName || "Anonymous User"}
+                </span>
               </div>
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">Email</label>
-              <div className="bg-[#232323] border border-gray-600 rounded-lg p-3 text-gray-400">
-                {user?.emailAddresses?.[0]?.emailAddress || "Not provided"}
+              <label className="block theme-text-secondary mb-2 text-sm lg:text-base">Email</label>
+              <div className="settings-input rounded-lg p-3 lg:p-4">
+                <span className="theme-text-primary text-sm lg:text-base break-all">
+                  {user?.emailAddresses?.[0]?.emailAddress || "Not provided"}
+                </span>
               </div>
             </div>
           </div>
+          <div className="mt-4 pt-4 border-t theme-border">
+            <button
+              onClick={() => openUserProfile()}
+              className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors text-sm lg:text-base touch-target"
+            >
+              🔧 Manage Profile in Clerk
+            </button>
+          </div>
         </div>
 
-        {/* Display Preferences */}
-        <div className="bg-[#1a1a1a] rounded-lg p-6 mb-8 border border-gray-700">
-          <h3 className="text-2xl font-bold text-[#f5c518] mb-4 flex items-center gap-2">
-            🎨 Display Preferences
+        <div className="settings-card rounded-lg p-4 lg:p-6 mb-4 lg:mb-8">
+          <h3 className="text-lg lg:text-2xl font-bold theme-accent mb-3 lg:mb-4 flex items-center gap-2">
+            <Icon name="palette" size={16} className="lg:w-5 lg:h-5" /> Display Preferences
           </h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-white font-semibold">Theme</label>
-                <p className="text-gray-400 text-sm">
+          <div className="space-y-4 lg:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex-1">
+                <label className="theme-text-primary font-semibold text-sm lg:text-base">Theme</label>
+                <p className="theme-text-secondary text-xs lg:text-sm">
                   Choose your preferred theme
                 </p>
               </div>
               <select
-                value={settings.theme}
-                onChange={(e) => handleSettingChange("theme", e.target.value)}
-                className="bg-[#232323] border border-gray-600 text-white px-3 py-2 rounded-lg"
+                value={theme}
+                onChange={(e) => handleThemeChange(e.target.value)}
+                className="settings-input px-3 py-2 rounded-lg text-sm lg:text-base touch-target"
               >
                 <option value="dark">Dark</option>
                 <option value="light">Light</option>
@@ -126,12 +131,12 @@ export default function SettingsPage() {
               </select>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-white font-semibold">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex-1">
+                <label className="theme-text-primary font-semibold text-sm lg:text-base">
                   Default Rating System
                 </label>
-                <p className="text-gray-400 text-sm">
+                <p className="theme-text-secondary text-xs lg:text-sm">
                   How you prefer to rate movies
                 </p>
               </div>
@@ -140,155 +145,127 @@ export default function SettingsPage() {
                 onChange={(e) =>
                   handleSettingChange("defaultRatingSystem", e.target.value)
                 }
-                className="bg-[#232323] border border-gray-600 text-white px-3 py-2 rounded-lg"
+                className="settings-input px-3 py-2 rounded-lg text-sm lg:text-base touch-target"
               >
                 <option value="numbers">Numbers (1-10)</option>
                 <option value="stars">Stars (1-5)</option>
               </select>
             </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-white font-semibold">Language</label>
-                <p className="text-gray-400 text-sm">Interface language</p>
-              </div>
-              <select
-                value={settings.language}
-                onChange={(e) =>
-                  handleSettingChange("language", e.target.value)
-                }
-                className="bg-[#232323] border border-gray-600 text-white px-3 py-2 rounded-lg"
-              >
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-              </select>
-            </div>
           </div>
         </div>
 
-        {/* Privacy & Content */}
-        <div className="bg-[#1a1a1a] rounded-lg p-6 mb-8 border border-gray-700">
-          <h3 className="text-2xl font-bold text-[#f5c518] mb-4 flex items-center gap-2">
-            🔒 Privacy & Content
+        <div className="settings-card rounded-lg p-4 lg:p-6 mb-4 lg:mb-8">
+          <h3 className="text-lg lg:text-2xl font-bold theme-accent mb-3 lg:mb-4 flex items-center gap-2">
+            <Icon name="lock" size={16} className="lg:w-5 lg:h-5" /> Privacy & Content
           </h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-white font-semibold">
+          <div className="space-y-4 lg:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex-1">
+                <label className="theme-text-primary font-semibold text-sm lg:text-base">
                   Show Spoilers
                 </label>
-                <p className="text-gray-400 text-sm">
+                <p className="theme-text-secondary text-xs lg:text-sm">
                   Display spoiler content in reviews
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center cursor-pointer touch-target">
                 <input
                   type="checkbox"
-                  className="sr-only peer"
+                  className="sr-only"
                   checked={settings.showSpoilers}
                   onChange={(e) =>
                     handleSettingChange("showSpoilers", e.target.checked)
                   }
                 />
-                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f5c518]"></div>
+                <div className={`w-11 h-6 rounded-full relative transition-colors duration-200 ${
+                  settings.showSpoilers ? 'settings-toggle-checked' : 'settings-toggle-unchecked'
+                }`}>
+                  <div className={`absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200 ${
+                    settings.showSpoilers ? 'translate-x-5' : 'translate-x-0'
+                  }`}></div>
+                </div>
               </label>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-white font-semibold">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex-1">
+                <label className="theme-text-primary font-semibold text-sm lg:text-base">
                   Show Adult Content
                 </label>
-                <p className="text-gray-400 text-sm">
+                <p className="theme-text-secondary text-xs lg:text-sm">
                   Display mature-rated movies
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center cursor-pointer touch-target">
                 <input
                   type="checkbox"
-                  className="sr-only peer"
+                  className="sr-only"
                   checked={settings.showAdultContent}
                   onChange={(e) =>
                     handleSettingChange("showAdultContent", e.target.checked)
                   }
                 />
-                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f5c518]"></div>
+                <div className={`w-11 h-6 rounded-full relative transition-colors duration-200 ${
+                  settings.showAdultContent ? 'settings-toggle-checked' : 'settings-toggle-unchecked'
+                }`}>
+                  <div className={`absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200 ${
+                    settings.showAdultContent ? 'translate-x-5' : 'translate-x-0'
+                  }`}></div>
+                </div>
               </label>
             </div>
           </div>
         </div>
 
-        {/* Notifications */}
-        <div className="bg-[#1a1a1a] rounded-lg p-6 mb-8 border border-gray-700">
-          <h3 className="text-2xl font-bold text-[#f5c518] mb-4 flex items-center gap-2">
+        <div className="settings-card rounded-lg p-4 lg:p-6 mb-4 lg:mb-8">
+          <h3 className="text-lg lg:text-2xl font-bold theme-accent mb-3 lg:mb-4 flex items-center gap-2">
             🔔 Notifications
           </h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-white font-semibold">
+          <div className="space-y-4 lg:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex-1">
+                <label className="theme-text-primary font-semibold text-sm lg:text-base">
                   Email Notifications
                 </label>
-                <p className="text-gray-400 text-sm">
+                <p className="theme-text-secondary text-xs lg:text-sm">
                   Receive updates about new movies and reviews
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center cursor-pointer touch-target">
                 <input
                   type="checkbox"
-                  className="sr-only peer"
+                  className="sr-only"
                   checked={settings.emailNotifications}
                   onChange={(e) =>
                     handleSettingChange("emailNotifications", e.target.checked)
                   }
                 />
-                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f5c518]"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-white font-semibold">
-                  Autoplay Trailers
-                </label>
-                <p className="text-gray-400 text-sm">
-                  Automatically play movie trailers when available
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  checked={settings.autoplay}
-                  onChange={(e) =>
-                    handleSettingChange("autoplay", e.target.checked)
-                  }
-                />
-                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f5c518]"></div>
+                <div className={`w-11 h-6 rounded-full relative transition-colors duration-200 ${
+                  settings.emailNotifications ? 'settings-toggle-checked' : 'settings-toggle-unchecked'
+                }`}>
+                  <div className={`absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200 ${
+                    settings.emailNotifications ? 'translate-x-5' : 'translate-x-0'
+                  }`}></div>
+                </div>
               </label>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center">
           <button
             onClick={saveSettings}
-            className={`px-8 py-3 rounded-lg font-semibold transition-all duration-200 ${
+            className={`px-6 lg:px-8 py-3 rounded-lg font-semibold transition-all duration-200 text-sm lg:text-base touch-target ${
               saved
-                ? "bg-green-600 text-white"
-                : "bg-[#f5c518] text-black hover:bg-yellow-400"
+                ? "settings-success text-white"
+                : "settings-button hover:opacity-90"
             }`}
           >
-            {saved ? "✅ Saved!" : "Save Settings"}
-          </button>
-          <button
-            onClick={resetSettings}
-            className="px-8 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition-all duration-200"
-          >
-            Reset to Default
+            {saved ? (
+              <><Icon name="checkCircle" size={16} className="lg:w-4 lg:h-4 mr-2" /> Saved!</>
+            ) : (
+              <><Icon name="save" size={16} className="lg:w-4 lg:h-4 mr-2" /> Save Settings</>
+            )}
           </button>
         </div>
       </div>

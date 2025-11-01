@@ -70,7 +70,7 @@ export const clearUserWatchlist = async (userId) => {
 export const isInWatchlist = async (userId, movieId) => {
   try {
     const watchlistItem = await Watchlist.findOne({ userId, movieId });
-    return { success: true, data: { inWatchlist: !!watchlistItem } };
+    return { success: true, data: { isInWatchlist: !!watchlistItem } };
   } catch (error) {
     console.error("Error checking watchlist:", error);
     return { success: false, error: "Failed to check watchlist" };

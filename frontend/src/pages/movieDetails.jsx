@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import React, { useEffect, useState } from "react";
 import {
   FaArrowLeft,
@@ -14,6 +14,7 @@ import apiService from "../services/api";
 export default function MovieDetailPage({ allMovies }) {
   const { id } = useParams();
   const { getToken } = useAuth();
+  const {  isSignedIn } = useUser();
 
   // Use backend data if available, fallback to prop data
   const [movie, setMovie] = useState(null);
@@ -37,6 +38,16 @@ export default function MovieDetailPage({ allMovies }) {
     setLoading(true);
     setError(null);
 
+    // Basic validation - only reject truly invalid IDs
+    if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
+      setError("Invalid movie ID");
+      setLoading(false);
+      return;
+    }
+
+    // Determine if this is a MongoDB ObjectId or a simple string ID
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
     try {
       // Try to get movie from backend first
       const movieData = await apiService.getMovieById(id);
@@ -44,57 +55,102 @@ export default function MovieDetailPage({ allMovies }) {
       if (movieData && (movieData._id || movieData.id)) {
         setMovie(movieData);
 
-        // Load user preferences from localStorage (temporary until backend integration)
+        // Load user preferences from localStorage
         const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
         const liked = JSON.parse(localStorage.getItem("likedMovies") || "[]");
 
         setIsWatchlisted(watchlist.includes(id));
         setIsLiked(liked.includes(id));
-      } else {
-        throw new Error("No valid movie data received from backend");
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error("Failed to load movie from backend:", err);
-
-      // Fallback to prop data if backend fails
-      const fallbackMovie = allMovies?.find((m) => m.movieId === id);
-      if (fallbackMovie) {
-        setMovie({
-          _id: id,
-          title: fallbackMovie.name,
-          description: fallbackMovie.desc,
-          poster: fallbackMovie.image,
-          releaseDate: new Date(fallbackMovie.year, 0, 1),
-          averageRating: fallbackMovie.rating || 0,
-          totalRatings: 0,
-          genre: [fallbackMovie.category],
-          // Add other required fields with defaults
-          director: "Unknown",
-          cast: [],
-          duration: 120,
-          language: "English",
-          country: "USA",
-          isActive: true,
-        });
-
-        // Load user preferences from localStorage for fallback
-        const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
-        const liked = JSON.parse(localStorage.getItem("likedMovies") || "[]");
-
-        setIsWatchlisted(watchlist.includes(id));
-        setIsLiked(liked.includes(id));
-      } else {
-        setError("Movie not found");
-      }
-    } finally {
-      setLoading(false);
+    } catch {
+      // Backend failed, continue to fallback
     }
+
+    // Fallback to local data - try exact match with all possible ID fields
+    let fallbackMovie = allMovies?.find((m) => 
+      m.movieId === id || m._id === id || m.id === id
+    );
+    
+    // If not found and it's an ObjectId, we can't match local data
+    if (!fallbackMovie && isObjectId) {
+      setError(`Movie with ObjectId "${id}" not found. Backend connection may be required.`);
+      setLoading(false);
+      return;
+    }
+
+    // If not found with simple ID, show available options
+    if (!fallbackMovie) {
+      const availableIds = allMovies?.map(m => 
+        m.movieId || m._id || m.id || 'no-id'
+      ).join(', ') || 'none';
+      setError(`Movie with ID "${id}" not found. Available IDs: ${availableIds}`);
+      setLoading(false);
+      return;
+    }
+
+    // Found in local data
+    setMovie({
+      _id: id,
+      title: fallbackMovie.name,
+      description: fallbackMovie.desc,
+      poster: fallbackMovie.image,
+      releaseDate: new Date(fallbackMovie.year, 0, 1),
+      averageRating: fallbackMovie.rating || 0,
+      totalRatings: 0,
+      genre: [fallbackMovie.category],
+      // Add other required fields with defaults
+      director: "Unknown",
+      cast: [],
+      duration: 120,
+      language: "English",
+      country: "USA",
+      isActive: true,
+    });
+
+    // Load user preferences from localStorage for fallback
+    const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
+    const liked = JSON.parse(localStorage.getItem("likedMovies") || "[]");
+
+    setIsWatchlisted(watchlist.includes(id));
+    setIsLiked(liked.includes(id));
+    setLoading(false);
   }, [id, allMovies]);
 
-  // Load movie data
+  // Load movie data (wait for allMovies to be available)
   useEffect(() => {
-    loadMovieData();
-  }, [loadMovieData]);
+    // Only load if we have allMovies or if it's null (meaning it failed to load)
+    if (allMovies !== undefined) {
+      loadMovieData();
+    }
+  }, [loadMovieData, allMovies]);
+
+  // Check watchlist status when user signs in (with error handling)
+  useEffect(() => {
+    const checkWatchlistStatus = async () => {
+      if (isSignedIn && movie) {
+        const movieId = movie?._id || movie?.id || movie?.movieId || id;
+
+        
+        if (!movieId) {
+          console.error('No valid movie ID found for watchlist check');
+          return;
+        }
+        
+        try {
+          const watchlistStatus = await apiService.checkWatchlistStatus(movieId);
+          setIsWatchlisted(watchlistStatus.isInWatchlist);
+        } catch {
+          // Silently fallback to localStorage without logging errors
+          const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+          setIsWatchlisted(watchlist.includes(movieId));
+        }
+      }
+    };
+
+    checkWatchlistStatus();
+  }, [isSignedIn, movie, id]);
 
   // Show notification helper
   const showNotification = (message) => {
@@ -103,21 +159,60 @@ export default function MovieDetailPage({ allMovies }) {
   };
 
   // Handle watchlist toggle
-  const handleWatchlistToggle = () => {
-    const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
-    let updatedWatchlist;
-
-    if (isWatchlisted) {
-      updatedWatchlist = watchlist.filter((movieId) => movieId !== id);
-      setIsWatchlisted(false);
-      showNotification("Removed from watchlist");
-    } else {
-      updatedWatchlist = [...watchlist, id];
-      setIsWatchlisted(true);
-      showNotification("Added to watchlist");
+  const handleWatchlistToggle = async () => {
+    if (!isSignedIn) {
+      showNotification("Please sign in to add to watchlist");
+      return;
     }
 
-    localStorage.setItem("watchlist", JSON.stringify(updatedWatchlist));
+    // Get the correct movie ID - try different possible properties
+    const movieId = movie?._id || movie?.id || movie?.movieId || id;
+    
+    if (!movieId) {
+      showNotification("Error: Movie ID not found");
+      return;
+    }
+
+    try {
+      if (isWatchlisted) {
+        // Remove from watchlist
+        await apiService.removeFromWatchlist(movieId);
+        setIsWatchlisted(false);
+        showNotification("Removed from watchlist");
+        console.log('Movie removed from watchlist:', movieId);
+      } else {
+        // Add to watchlist
+        await apiService.addToWatchlist(movieId);
+        setIsWatchlisted(true);
+        showNotification("Added to watchlist");
+        console.log('Movie added to watchlist:', movieId);
+      }
+    } catch (error) {
+      console.error('Error toggling watchlist:', error);
+      
+      // Handle 409 conflict (movie already in watchlist)
+      if (error.message.includes('already in watchlist')) {
+        setIsWatchlisted(true);
+        showNotification("Movie is already in watchlist");
+        return;
+      }
+      
+      // Fallback to localStorage for offline functionality
+      const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
+      let updatedWatchlist;
+
+      if (isWatchlisted) {
+        updatedWatchlist = watchlist.filter((movieId) => movieId !== movie.movieId);
+        setIsWatchlisted(false);
+        showNotification("Removed from watchlist (offline)");
+      } else {
+        updatedWatchlist = [...watchlist, movie.movieId];
+        setIsWatchlisted(true);
+        showNotification("Added to watchlist (offline)");
+      }
+
+      localStorage.setItem("watchlist", JSON.stringify(updatedWatchlist));
+    }
   };
 
   // Handle like toggle
@@ -142,7 +237,7 @@ export default function MovieDetailPage({ allMovies }) {
   const handleShare = async () => {
     const url = window.location.href;
     const title = `${movie.title} - CriticScore`;
-    const text = `${movie.description}\n\nRated ${movie.averageRating}/10 ⭐`;
+    const text = `${movie.description}\n\nRated ${movie.averageRating}/10 stars`;
 
     if (navigator.share) {
       try {
@@ -185,9 +280,9 @@ export default function MovieDetailPage({ allMovies }) {
 
   if (loading) {
     return (
-      <section className="px-8 py-6">
+      <section className="px-8 py-6 theme-bg-primary">
         <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f5c518]"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 theme-border-accent"></div>
         </div>
       </section>
     );
@@ -195,19 +290,41 @@ export default function MovieDetailPage({ allMovies }) {
 
   if (error || !movie) {
     return (
-      <section className="px-8 py-6">
-        <div className="text-center text-red-400 text-xl">
-          {error || "Movie not found"}
+      <section className="px-8 py-6 theme-bg-primary min-h-screen flex items-center justify-center">
+        <div className="text-center p-8 theme-bg-secondary rounded-xl shadow-lg max-w-md mx-auto">
+          <div className="mb-4">
+            <svg className="w-16 h-16 mx-auto text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold theme-text-primary mb-2">Movie Not Found</h2>
+          <p className="theme-text-secondary mb-6">
+            {error || `Sorry, we couldn't find the movie with ID: ${id}`}
+          </p>
+          <div className="space-y-3">
+            <Link 
+              to="/" 
+              className="block w-full theme-bg-accent theme-text-accent-contrast px-6 py-3 rounded-lg hover:opacity-90 transition-opacity font-semibold"
+            >
+              Back to Home
+            </Link>
+            <button 
+              onClick={() => window.history.back()} 
+              className="block w-full theme-border theme-text-primary px-6 py-3 rounded-lg border hover:theme-bg-secondary transition-colors"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="px-8 py-6">
+    <section className="px-8 py-6 theme-bg-primary theme-text-primary">
       {/* Notification Toast */}
       {notification && (
-        <div className="fixed top-4 right-4 bg-[#f5c518] text-black px-6 py-3 rounded-lg shadow-lg z-50 font-semibold">
+        <div className="fixed top-4 right-4 theme-bg-accent theme-text-accent-contrast px-6 py-3 rounded-lg shadow-lg z-50 font-semibold">
           {notification}
         </div>
       )}
@@ -217,7 +334,7 @@ export default function MovieDetailPage({ allMovies }) {
         <div className="mb-6">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-[#f5c518] hover:text-[#e5b91f] transition-colors"
+            className="inline-flex items-center gap-2 theme-accent hover:theme-accent-hover transition-colors"
           >
             <FaArrowLeft /> Back to Movies
           </Link>
@@ -225,7 +342,7 @@ export default function MovieDetailPage({ allMovies }) {
 
         {/* Hero Section */}
         <div className="relative mb-8 rounded-2xl overflow-hidden shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent z-10"></div>
+          <div className="absolute inset-0 theme-gradient-overlay z-10"></div>
           <img
             src={movie.poster}
             alt={movie.title}
@@ -236,35 +353,35 @@ export default function MovieDetailPage({ allMovies }) {
               <img
                 src={movie.poster}
                 alt={movie.title}
-                className="w-48 h-72 object-cover rounded-xl shadow-2xl border-2 border-[#f5c518]"
+                className="w-48 h-72 object-cover rounded-xl shadow-2xl border-2 theme-border-accent"
               />
               <div className="flex-1">
-                <h1 className="text-5xl font-bold text-[#f5c518] mb-4 drop-shadow-lg">
+                <h1 className="text-5xl font-bold theme-accent mb-4 drop-shadow-lg">
                   {movie.title}
                 </h1>
-                <p className="text-gray-200 text-lg mb-6 leading-relaxed max-w-2xl">
+                <p className="theme-text-secondary text-lg mb-6 leading-relaxed max-w-2xl">
                   {movie.description}
                 </p>
 
                 {/* Movie Info */}
                 <div className="flex items-center gap-6 mb-6">
-                  <span className="text-lg font-bold bg-[#f5c518] text-black px-3 py-1 rounded">
+                  <span className="text-lg font-bold theme-bg-accent theme-text-accent-contrast px-3 py-1 rounded">
                     {new Date(movie.releaseDate).getFullYear()}
                   </span>
                   <div className="flex items-center gap-2">
-                    <FaStar className="text-[#f5c518]" />
-                    <span className="text-white text-lg font-semibold">
+                    <FaStar className="theme-accent" />
+                    <span className="theme-text-primary text-lg font-semibold">
                       {movie.averageRating
                         ? movie.averageRating.toFixed(1)
                         : "N/A"}
                       /10
                     </span>
-                    <span className="text-gray-400 text-sm">
+                    <span className="theme-text-secondary text-sm">
                       ({movie.totalRatings || 0}{" "}
                       {movie.totalRatings === 1 ? "rating" : "ratings"})
                     </span>
                   </div>
-                  <span className="bg-[#232323] text-[#f5c518] px-3 py-1 rounded border border-[#f5c518]">
+                  <span className="theme-bg-secondary theme-accent px-3 py-1 rounded border theme-border-accent">
                     {movie.genre?.[0] || "Drama"}
                   </span>
                 </div>
@@ -275,8 +392,8 @@ export default function MovieDetailPage({ allMovies }) {
                     onClick={handleWatchlistToggle}
                     className={`px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
                       isWatchlisted
-                        ? "bg-[#f5c518] text-black"
-                        : "bg-[#232323] text-[#f5c518] border border-[#f5c518] hover:bg-[#f5c518] hover:text-black"
+                        ? "theme-bg-accent theme-text-accent-contrast"
+                        : "theme-bg-secondary theme-accent border theme-border-accent hover:theme-bg-accent hover:theme-text-accent-contrast"
                     }`}
                   >
                     <FaBookmark />{" "}
@@ -287,14 +404,14 @@ export default function MovieDetailPage({ allMovies }) {
                     className={`p-3 rounded-lg transition-colors ${
                       isLiked
                         ? "bg-red-600 text-white"
-                        : "bg-[#232323] text-gray-400 hover:text-red-500"
+                        : "theme-bg-secondary theme-text-secondary hover:text-red-500"
                     }`}
                   >
                     <FaHeart />
                   </button>
                   <button
                     onClick={handleShare}
-                    className="p-3 bg-[#232323] text-gray-400 rounded-lg hover:text-[#f5c518] transition-colors"
+                    className="p-3 theme-bg-secondary theme-text-secondary rounded-lg hover:theme-accent transition-colors"
                     title="Share this movie"
                   >
                     <FaShare />
@@ -309,74 +426,74 @@ export default function MovieDetailPage({ allMovies }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             {/* Movie Overview */}
-            <div className="bg-[#232323] rounded-xl p-8 mb-8">
+            <div className="theme-bg-secondary rounded-xl p-8 mb-8">
               <div className="flex items-center gap-4 mb-6">
-                <span className="w-1 bg-[#f5c518] h-6 inline-block rounded-full"></span>
-                <h2 className="text-2xl font-bold text-white">Overview</h2>
+                <span className="w-1 theme-bg-accent h-6 inline-block rounded-full"></span>
+                <h2 className="text-2xl font-bold theme-text-primary">Overview</h2>
               </div>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-3">
+                  <h3 className="text-xl font-semibold theme-text-primary mb-3">
                     Synopsis
                   </h3>
-                  <p className="text-gray-300 leading-relaxed">
+                  <p className="theme-text-secondary leading-relaxed">
                     {movie.description}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <h4 className="text-lg font-semibold text-[#f5c518] mb-2">
+                    <h4 className="text-lg font-semibold theme-accent mb-2">
                       Details
                     </h4>
-                    <div className="space-y-2 text-gray-300">
+                    <div className="space-y-2 theme-text-secondary">
                       <p>
-                        <span className="text-white font-medium">
+                        <span className="theme-text-primary font-medium">
                           Release Year:
                         </span>{" "}
                         {new Date(movie.releaseDate).getFullYear()}
                       </p>
                       <p>
-                        <span className="text-white font-medium">Genre:</span>{" "}
+                        <span className="theme-text-primary font-medium">Genre:</span>{" "}
                         {movie.genre?.join(", ") || "N/A"}
                       </p>
                       <p>
-                        <span className="text-white font-medium">
+                        <span className="theme-text-primary font-medium">
                           Duration:
                         </span>{" "}
                         {movie.duration ? `${movie.duration} min` : "N/A"}
                       </p>
                       <p>
-                        <span className="text-white font-medium">
+                        <span className="theme-text-primary font-medium">
                           Language:
                         </span>{" "}
                         {movie.language || "N/A"}
                       </p>
                       <p>
-                        <span className="text-white font-medium">Country:</span>{" "}
+                        <span className="theme-text-primary font-medium">Country:</span>{" "}
                         {movie.country || "N/A"}
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-semibold text-[#f5c518] mb-2">
+                    <h4 className="text-lg font-semibold theme-accent mb-2">
                       Cast & Crew
                     </h4>
-                    <div className="space-y-2 text-gray-300">
+                    <div className="space-y-2 theme-text-secondary">
                       <p>
-                        <span className="text-white font-medium">
+                        <span className="theme-text-primary font-medium">
                           Director:
                         </span>{" "}
                         {movie.director || "N/A"}
                       </p>
                       <p>
-                        <span className="text-white font-medium">Cast:</span>{" "}
+                        <span className="theme-text-primary font-medium">Cast:</span>{" "}
                         {movie.cast?.join(", ") || "N/A"}
                       </p>
                       {movie.budget && (
                         <p>
-                          <span className="text-white font-medium">
+                          <span className="theme-text-primary font-medium">
                             Budget:
                           </span>{" "}
                           ${(movie.budget / 1000000).toFixed(1)}M
@@ -384,7 +501,7 @@ export default function MovieDetailPage({ allMovies }) {
                       )}
                       {movie.boxOffice && (
                         <p>
-                          <span className="text-white font-medium">
+                          <span className="theme-text-primary font-medium">
                             Box Office:
                           </span>{" "}
                           ${(movie.boxOffice / 1000000).toFixed(1)}M
@@ -406,14 +523,14 @@ export default function MovieDetailPage({ allMovies }) {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Stats */}
-            <div className="bg-[#232323] rounded-xl p-6">
-              <h3 className="text-xl font-bold text-[#f5c518] mb-4">
+            <div className="theme-bg-secondary rounded-xl p-6">
+              <h3 className="text-xl font-bold theme-accent mb-4">
                 Quick Stats
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">CriticScore Rating</span>
-                  <span className="text-white font-semibold">
+                  <span className="theme-text-secondary">CriticScore Rating</span>
+                  <span className="theme-text-primary font-semibold">
                     {movie.averageRating
                       ? movie.averageRating.toFixed(1)
                       : "N/A"}
@@ -421,20 +538,20 @@ export default function MovieDetailPage({ allMovies }) {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Total Ratings</span>
-                  <span className="text-white font-semibold">
+                  <span className="theme-text-secondary">Total Ratings</span>
+                  <span className="theme-text-primary font-semibold">
                     {movie.totalRatings || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Release Date</span>
-                  <span className="text-white font-semibold">
+                  <span className="theme-text-secondary">Release Date</span>
+                  <span className="theme-text-primary font-semibold">
                     {new Date(movie.releaseDate).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Status</span>
-                  <span className="text-white font-semibold">
+                  <span className="theme-text-secondary">Status</span>
+                  <span className="theme-text-primary font-semibold">
                     {movie.isActive ? "Available" : "Unavailable"}
                   </span>
                 </div>
@@ -442,8 +559,8 @@ export default function MovieDetailPage({ allMovies }) {
             </div>
 
             {/* Movie Poster */}
-            <div className="bg-[#232323] rounded-xl p-6">
-              <h3 className="text-xl font-bold text-[#f5c518] mb-4">Poster</h3>
+            <div className="theme-bg-secondary rounded-xl p-6">
+              <h3 className="text-xl font-bold theme-accent mb-4">Poster</h3>
               <img
                 src={movie.poster}
                 alt={movie.title}

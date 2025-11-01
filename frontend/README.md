@@ -4,6 +4,8 @@ A movie rating web app built with React, Vite, and Tailwind CSS.
 
 ## Getting Started
 
+
+
 1. Install dependencies:
    ```sh
    npm install

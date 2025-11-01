@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+import { errorHandler } from '../utils/errorHandler.js';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://criticscore.onrender.com/";
 
 class ApiService {
   constructor() {
@@ -7,7 +9,15 @@ class ApiService {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    console.log("🌐 API Request:", options.method || "GET", url);
+    
+    // Reduce logging for frequently called endpoints
+    const isWatchlistRequest = endpoint.includes('/watchlist/check/');
+    const isMovieRequest = endpoint.includes('/api/movies');
+    const shouldLog = !isWatchlistRequest && (Math.random() < 0.3 || !isMovieRequest); // Log 30% of requests
+    
+    if (shouldLog) {
+      console.log("🌐 API Request:", options.method || "GET", url);
+    }
 
     const config = {
       headers: {
@@ -23,11 +33,6 @@ class ApiService {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    console.log("🌐 Request config:", {
-      ...config,
-      body: config.body ? "Body included" : "No body",
-    });
-
     try {
       const response = await fetch(url, config);
 
@@ -39,10 +44,14 @@ class ApiService {
       }
 
       const result = await response.json();
-      console.log("🌐 Response:", response.status, result);
+      if (shouldLog) {
+        console.log("🌐 Response:", response.status, result);
+      }
       return result;
     } catch (error) {
-      console.error("API request failed:", error);
+      // Use error handler for better error management
+      const shouldSilence = isWatchlistRequest || isMovieRequest;
+      errorHandler.handleApiError(error, endpoint, shouldSilence);
       throw error;
     }
   }
@@ -52,12 +61,15 @@ class ApiService {
     try {
       if (window.__clerk_token_getter) {
         const token = await window.__clerk_token_getter();
-        console.log(
-          "Auth token retrieved:",
-          token ? "✓ Token exists" : "✗ No token"
-        );
+        // Only log token status occasionally to reduce spam
+        if (Math.random() < 0.1) { // Log ~10% of the time
+          console.log(
+            "Auth token retrieved:",
+            token ? "✓ Token exists" : "✗ No token"
+          );
+        }
         return token;
-      } else {
+      } else if (Math.random() < 0.1) {
         console.warn("No token getter available");
       }
     } catch (error) {
@@ -198,6 +210,80 @@ class ApiService {
     } catch (error) {
       console.error("Error clearing watchlist:", error);
       return false;
+    }
+  }
+
+  // Admin Methods for Movie Management
+  async createMovie(movieData) {
+    try {
+      console.log("🎬 Creating new movie:", movieData.title);
+      return await this.request("/api/admin/movies", {
+        method: "POST",
+        body: JSON.stringify(movieData),
+      });
+    } catch (error) {
+      console.error("Error creating movie:", error);
+      throw error;
+    }
+  }
+
+  async updateMovie(movieId, movieData) {
+    try {
+      console.log("🎬 Updating movie:", movieId);
+      return await this.request(`/api/admin/movies/${movieId}`, {
+        method: "PUT",
+        body: JSON.stringify(movieData),
+      });
+    } catch (error) {
+      console.error("Error updating movie:", error);
+      throw error;
+    }
+  }
+
+  async deleteMovie(movieId) {
+    try {
+      console.log("🎬 Deleting movie:", movieId);
+      return await this.request(`/api/admin/movies/${movieId}`, {
+        method: "DELETE",
+      });
+    } catch (error) {
+      console.error("Error deleting movie:", error);
+      throw error;
+    }
+  }
+
+  async getAdminStats() {
+    try {
+      console.log("📊 Fetching admin statistics");
+      return await this.request("/api/admin/stats");
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      throw error;
+    }
+  }
+
+  async toggleMovieFeatured(movieId) {
+    try {
+      console.log("⭐ Toggling featured status for movie:", movieId);
+      return await this.request(`/api/admin/movies/${movieId}/featured`, {
+        method: "PATCH",
+      });
+    } catch (error) {
+      console.error("Error toggling featured status:", error);
+      throw error;
+    }
+  }
+
+  async bulkUpdateMovies(movieIds, updateData) {
+    try {
+      console.log("🔄 Bulk updating movies:", movieIds.length);
+      return await this.request("/api/admin/movies/bulk", {
+        method: "PATCH",
+        body: JSON.stringify({ movieIds, updateData }),
+      });
+    } catch (error) {
+      console.error("Error bulk updating movies:", error);
+      throw error;
     }
   }
 }

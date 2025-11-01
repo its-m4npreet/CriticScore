@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3000;
 connectDB();
 checkSuperAdmin();
 
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: "https://critic-score-xcul.vercel.app" }));
 app.use(clerkMiddleware());
 app.use(express.json());
 
