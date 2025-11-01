@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { Icon } from "../components/Icons";
 import ApiService from "../services/api";
-import { isUserAdmin } from "../adminDetails.js";
+
+import { isUserAdmin } from "../adminDetails";
 
 export default function AdminDashboard({ onMovieChange }) {
   const { user } = useUser();
