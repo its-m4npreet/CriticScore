@@ -27,7 +27,7 @@ export default function AdminDashboard({ onMovieChange }) {
         console.log('❌ Admin access needed. Options:');
         console.log('1. Add your email to ADMIN_EMAILS in adminDetails.js');
         console.log('2. Or run this in console to make yourself admin:');
-        console.log(`fetch('http://localhost:3000/api/dev/make-admin', {
+        console.log(`fetch('https://criticscore.onrender.com/api/dev/make-admin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: '${userEmail}' })
@@ -253,7 +253,7 @@ export default function AdminDashboard({ onMovieChange }) {
     
     try {
       const userEmail = user.emailAddresses?.[0]?.emailAddress;
-      const response = await fetch('http://localhost:3000/api/dev/make-admin', {
+      const response = await fetch('https://criticscore.onrender.com/api/dev/make-admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail })
