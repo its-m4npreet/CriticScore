@@ -9,7 +9,7 @@ import {
   FaUserShield
 } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
-import { isUserAdmin } from "../adminDetails.js";
+import { isUserAdmin } from "../adminDetails";
 
 export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
   const { user } = useUser();
