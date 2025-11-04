@@ -254,7 +254,8 @@ export default function AdminDashboard({ onMovieChange }) {
     
     try {
       const userEmail = user.emailAddresses?.[0]?.emailAddress;
-      const response = await fetch('https://criticscore.onrender.com/api/dev/make-admin', {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || "https://criticscore.onrender.com/";
+      const response = await fetch(`${API_BASE_URL}/api/dev/make-admin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail })
