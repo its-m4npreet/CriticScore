@@ -255,26 +255,26 @@ function App() {
               </SignedOut>
               {/* Notification bell for signed in users */}
               <SignedIn>
-                <div className="relative mr-6 notification-container">
+                <div className="relative mr-2 lg:mr-6 notification-container">
                   <button
                     onClick={() => setShowNotifications((s) => !s)}
-                    className="mr-4 p-3 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer"
+                    className="mr-2 lg:mr-4 p-2 lg:p-3 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer"
                     title="Notifications"
                   >
                     <FaBell className="w-5 h-5 lg:w-6 lg:h-6" />
                     {unseenCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-red-600 text-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center">{unseenCount}</span>
+                      <span className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-red-600 text-white text-xs lg:text-sm font-bold rounded-full w-5 h-5 lg:w-6 lg:h-6 flex items-center justify-center">{unseenCount > 9 ? '9+' : unseenCount}</span>
                     )}
                   </button>
 
                   {showNotifications && (
-                    <div className="absolute right-0 mt-2 w-96 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg z-50 max-h-96 overflow-hidden">
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)] bg-[var(--bg-tertiary)]">
-                        <strong className="text-base text-[var(--text-primary)]">New Movies</strong>
-                        <div className="flex items-center gap-3">
+                    <div className="fixed lg:absolute left-2 right-2 lg:left-auto lg:right-0 top-16 lg:top-auto lg:mt-2 w-auto lg:w-96 max-w-md lg:max-w-none bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg z-50 max-h-[calc(100vh-5rem)] lg:max-h-96 overflow-hidden">
+                      <div className="flex items-center justify-between px-3 lg:px-4 py-2 lg:py-3 border-b border-[var(--border-color)] bg-[var(--bg-tertiary)]">
+                        <strong className="text-sm lg:text-base text-[var(--text-primary)]">New Movies</strong>
+                        <div className="flex items-center gap-2 lg:gap-3">
                           <button 
                             onClick={() => { setNotifications([]); setUnseenCount(0); }} 
-                            className="text-sm text-[var(--accent-color)] hover:text-[var(--text-primary)] font-semibold"
+                            className="text-xs lg:text-sm text-[var(--accent-color)] hover:text-[var(--text-primary)] font-semibold"
                           >
                             Clear All
                           </button>
@@ -283,16 +283,16 @@ function App() {
                             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-[var(--bg-secondary)] transition-colors"
                             title="Close"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           </button>
                         </div>
                       </div>
-                      <div className="overflow-y-auto max-h-80">
+                      <div className="overflow-y-auto max-h-[calc(100vh-10rem)] lg:max-h-80 mobile-scrollbar">
                         {notifications.length === 0 ? (
-                          <div className="p-8 text-center text-sm text-[var(--text-secondary)]">
-                            <div className="text-4xl mb-2">🎬</div>
+                          <div className="p-6 lg:p-8 text-center text-xs lg:text-sm text-[var(--text-secondary)]">
+                            <div className="text-3xl lg:text-4xl mb-2">🎬</div>
                             <p>No new movies yet</p>
                           </div>
                         ) : (
@@ -315,7 +315,7 @@ function App() {
                               return (
                                 <div 
                                   key={movieId || `movie-${index}`} 
-                                  className="flex items-start gap-3 p-3 hover:bg-[var(--bg-tertiary)] cursor-pointer transition-colors" 
+                                  className="flex items-start gap-2 lg:gap-3 p-2 lg:p-3 hover:bg-[var(--bg-tertiary)] cursor-pointer transition-colors active:bg-[var(--bg-tertiary)]" 
                                   onClick={() => { 
                                     console.log('Clicking movie notification:', { movieId, movieTitle, fullMovie: m });
                                     if (movieId) {
@@ -331,7 +331,7 @@ function App() {
                                     <img 
                                       src={moviePoster} 
                                       alt={movieTitle} 
-                                      className="w-16 h-24 object-cover rounded shadow-md flex-shrink-0 bg-[var(--bg-tertiary)]"
+                                      className="w-12 h-16 lg:w-16 lg:h-24 object-cover rounded shadow-md flex-shrink-0 bg-[var(--bg-tertiary)]"
                                       onError={(e) => { 
                                         console.log('Image failed to load:', moviePoster);
                                         e.target.src = 'https://via.placeholder.com/150x225?text=No+Image'; 
@@ -339,23 +339,23 @@ function App() {
                                     />
                                   )}
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="font-bold text-[var(--text-primary)] mb-1 text-sm leading-tight">
+                                    <h4 className="font-bold text-[var(--text-primary)] mb-1 text-xs lg:text-sm leading-tight truncate">
                                       {movieTitle}
                                     </h4>
-                                    <div className="flex flex-col gap-1 text-xs text-[var(--text-secondary)]">
+                                    <div className="flex flex-col gap-0.5 lg:gap-1 text-[10px] lg:text-xs text-[var(--text-secondary)]">
                                       {movieYear && (
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1 lg:gap-2">
                                           <span className="font-semibold">📅 {movieYear}</span>
                                         </div>
                                       )}
                                       {movieGenre && (
-                                        <div className="flex items-center gap-1">
-                                          <span>🎭 {movieGenre}</span>
+                                        <div className="flex items-center gap-1 truncate">
+                                          <span className="truncate">🎭 {movieGenre}</span>
                                         </div>
                                       )}
                                       {movieDirector && (
-                                        <div className="flex items-center gap-1">
-                                          <span>🎬 {movieDirector}</span>
+                                        <div className="hidden lg:flex items-center gap-1 truncate">
+                                          <span className="truncate">🎬 {movieDirector}</span>
                                         </div>
                                       )}
                                       {movieRating > 0 && (
@@ -364,8 +364,8 @@ function App() {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-1 text-xs mt-2">
-                                      <span className="bg-[var(--accent-color)] text-[var(--bg-primary)] px-2 py-0.5 rounded-full font-semibold">
+                                    <div className="flex items-center gap-1 text-[10px] lg:text-xs mt-1 lg:mt-2">
+                                      <span className="bg-[var(--accent-color)] text-[var(--bg-primary)] px-1.5 lg:px-2 py-0.5 rounded-full font-semibold">
                                         NEW
                                       </span>
                                     </div>
