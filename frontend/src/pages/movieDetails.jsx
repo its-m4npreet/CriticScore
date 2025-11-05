@@ -321,100 +321,106 @@ export default function MovieDetailPage({ allMovies }) {
   }
 
   return (
-    <section className="px-8 py-6 theme-bg-primary theme-text-primary">
+    <section className="px-4 lg:px-8 py-4 lg:py-6 theme-bg-primary theme-text-primary">
       {/* Notification Toast */}
       {notification && (
-        <div className="fixed top-4 right-4 theme-bg-accent theme-text-accent-contrast px-6 py-3 rounded-lg shadow-lg z-50 font-semibold">
+        <div className="fixed top-4 right-4 left-4 lg:left-auto theme-bg-accent theme-text-accent-contrast px-4 lg:px-6 py-2 lg:py-3 rounded-lg shadow-lg z-50 font-semibold text-sm lg:text-base text-center">
           {notification}
         </div>
       )}
 
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
-        <div className="mb-6">
+        <div className="mb-4 lg:mb-6">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 theme-accent hover:theme-accent-hover transition-colors"
+            className="inline-flex items-center gap-2 theme-accent hover:theme-accent-hover transition-colors text-sm lg:text-base"
           >
-            <FaArrowLeft /> Back to Movies
+            <FaArrowLeft className="w-3 h-3 lg:w-4 lg:h-4" /> Back to Movies
           </Link>
         </div>
 
         {/* Hero Section */}
-        <div className="relative mb-8 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="relative mb-6 lg:mb-8 rounded-xl lg:rounded-2xl overflow-hidden shadow-2xl">
           <div className="absolute inset-0 theme-gradient-overlay z-10"></div>
           <img
             src={movie.poster}
             alt={movie.title}
-            className="w-full h-96 object-cover"
+            className="w-full h-64 lg:h-96 object-cover"
           />
-          <div className="absolute inset-0 z-20 flex items-center px-12">
-            <div className="flex gap-8 items-center max-w-4xl">
+          <div className="absolute inset-0 z-20 flex items-center px-4 lg:px-12">
+            <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start lg:items-center max-w-4xl w-full">
               <img
                 src={movie.poster}
                 alt={movie.title}
-                className="w-48 h-72 object-cover rounded-xl shadow-2xl border-2 theme-border-accent"
+                className="hidden sm:block w-32 h-48 lg:w-48 lg:h-72 object-cover rounded-lg lg:rounded-xl shadow-2xl border-2 theme-border-accent flex-shrink-0"
               />
-              <div className="flex-1">
-                <h1 className="text-5xl font-bold theme-accent mb-4 drop-shadow-lg">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold theme-accent mb-2 lg:mb-4 drop-shadow-lg">
                   {movie.title}
                 </h1>
-                <p className="theme-text-secondary text-lg mb-6 leading-relaxed max-w-2xl">
+                <p className="theme-text-secondary text-sm lg:text-lg mb-4 lg:mb-6 leading-relaxed max-w-2xl line-clamp-2 lg:line-clamp-none">
                   {movie.description}
                 </p>
 
                 {/* Movie Info */}
-                <div className="flex items-center gap-6 mb-6">
-                  <span className="text-lg font-bold theme-bg-accent theme-text-accent-contrast px-3 py-1 rounded">
+                <div className="flex flex-wrap items-center gap-2 lg:gap-6 mb-4 lg:mb-6">
+                  <span className="text-sm lg:text-lg font-bold theme-bg-accent theme-text-accent-contrast px-2 lg:px-3 py-1 rounded whitespace-nowrap">
                     {new Date(movie.releaseDate).getFullYear()}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <FaStar className="theme-accent" />
-                    <span className="theme-text-primary text-lg font-semibold">
+                  <div className="flex items-center gap-1 lg:gap-2 flex-shrink-0">
+                    <FaStar className="theme-accent w-3 h-3 lg:w-4 lg:h-4" />
+                    <span className="theme-text-primary text-sm lg:text-lg font-semibold whitespace-nowrap">
                       {movie.averageRating
                         ? movie.averageRating.toFixed(1)
                         : "N/A"}
                       /10
                     </span>
-                    <span className="theme-text-secondary text-sm">
+                    <span className="theme-text-secondary text-xs lg:text-sm whitespace-nowrap">
                       ({movie.totalRatings || 0}{" "}
                       {movie.totalRatings === 1 ? "rating" : "ratings"})
                     </span>
                   </div>
-                  <span className="theme-bg-secondary theme-accent px-3 py-1 rounded border theme-border-accent">
+                  <span className="theme-bg-secondary theme-accent px-2 lg:px-3 py-1 rounded border theme-border-accent text-xs lg:text-sm whitespace-nowrap">
                     {movie.genre?.[0] || "Drama"}
                   </span>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-2 lg:gap-4">
                   <button
                     onClick={handleWatchlistToggle}
-                    className={`px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
+                    className={`px-3 lg:px-6 py-2 lg:py-3 rounded-lg text-xs lg:text-base font-semibold transition-colors flex items-center gap-1 lg:gap-2 whitespace-nowrap ${
                       isWatchlisted
                         ? "theme-bg-accent theme-text-accent-contrast"
                         : "theme-bg-secondary theme-accent border theme-border-accent hover:theme-bg-accent hover:theme-text-accent-contrast"
                     }`}
                   >
-                    <FaBookmark />{" "}
-                    {isWatchlisted ? "In Watchlist" : "Add to Watchlist"}
+                    <FaBookmark className="w-3 h-3 lg:w-4 lg:h-4" />
+                    <span className="hidden sm:inline">
+                      {isWatchlisted ? "In Watchlist" : "Add to Watchlist"}
+                    </span>
+                    <span className="sm:hidden">
+                      {isWatchlisted ? "Added" : "Add"}
+                    </span>
                   </button>
                   <button
                     onClick={handleLikeToggle}
-                    className={`p-3 rounded-lg transition-colors ${
+                    className={`p-2 lg:p-3 rounded-lg transition-colors ${
                       isLiked
                         ? "bg-red-600 text-white"
                         : "theme-bg-secondary theme-text-secondary hover:text-red-500"
                     }`}
+                    title={isLiked ? "Remove from favorites" : "Add to favorites"}
                   >
-                    <FaHeart />
+                    <FaHeart className="w-4 h-4 lg:w-5 lg:h-5" />
                   </button>
                   <button
                     onClick={handleShare}
-                    className="p-3 theme-bg-secondary theme-text-secondary rounded-lg hover:theme-accent transition-colors"
+                    className="p-2 lg:p-3 theme-bg-secondary theme-text-secondary rounded-lg hover:theme-accent transition-colors"
                     title="Share this movie"
                   >
-                    <FaShare />
+                    <FaShare className="w-4 h-4 lg:w-5 lg:h-5" />
                   </button>
                 </div>
               </div>
